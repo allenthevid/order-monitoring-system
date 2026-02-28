@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { Invoice } from "@/types";
 
 // In-memory storage (replace with database in production)
-let invoices: Invoice[] = [
+const invoices: Invoice[] = [
   {
     id: "1",
     invoiceNumber: "INV-2026-001",

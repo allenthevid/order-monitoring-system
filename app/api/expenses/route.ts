@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { Expense } from "@/types";
 
 // In-memory storage (replace with database in production)
-let expenses: Expense[] = [
+const expenses: Expense[] = [
   {
     id: "1",
     description: "PLA Filament - Black (5 rolls)",

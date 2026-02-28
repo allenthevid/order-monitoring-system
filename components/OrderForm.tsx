@@ -47,13 +47,13 @@ export default function OrderForm({ onSubmit }: OrderFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    const orderData: any = {
+    const orderData: Omit<Order, "id"> = {
       ...formData,
-      status: "pending",
+      status: "pending" as const,
       orderDate: new Date(),
       payments: [],
       amountPaid: 0,
-      paymentStatus: "unpaid",
+      paymentStatus: "unpaid" as const,
     };
 
     if (useMultipleColors && colorVariants.length > 0) {

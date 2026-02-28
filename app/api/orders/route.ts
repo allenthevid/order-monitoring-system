@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { Order } from "@/types";
 
 // In-memory storage (replace with database in production)
-let orders: Order[] = [
+const orders: Order[] = [
   {
     id: "1",
     customerName: "John Smith",

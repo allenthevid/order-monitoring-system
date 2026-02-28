@@ -48,7 +48,7 @@ export default function InvoiceCard({ invoice }: InvoiceCardProps) {
     });
 
     // Totals
-    const finalY = (doc as any).lastAutoTable.finalY || 90;
+    const finalY = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY || 90;
     doc.text(`Subtotal: ₱${invoice.subtotal.toFixed(2)}`, 150, finalY + 10);
     doc.text(`Tax: ₱${invoice.tax.toFixed(2)}`, 150, finalY + 16);
     doc.setFontSize(12);

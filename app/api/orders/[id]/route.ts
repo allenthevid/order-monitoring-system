@@ -1,9 +1,4 @@
 import { NextResponse } from "next/server";
-import { Order } from "@/types";
-
-// This would connect to your actual storage
-// For now, we'll simulate it
-let orders: Order[] = [];
 
 export async function PATCH(
   request: Request,
