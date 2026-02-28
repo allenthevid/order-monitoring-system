@@ -81,7 +81,7 @@ export default function OrderForm({ onSubmit }: OrderFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-xl font-semibold mb-4">New Order</h2>
+      <h2 className="text-xl font-semibold text-gray-900 mb-4">New Order</h2>
       <div className="grid md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -94,7 +94,7 @@ export default function OrderForm({ onSubmit }: OrderFormProps) {
             onChange={(e) =>
               setFormData({ ...formData, customerName: e.target.value })
             }
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
@@ -109,7 +109,7 @@ export default function OrderForm({ onSubmit }: OrderFormProps) {
             onChange={(e) =>
               setFormData({ ...formData, email: e.target.value })
             }
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
@@ -124,7 +124,7 @@ export default function OrderForm({ onSubmit }: OrderFormProps) {
             onChange={(e) =>
               setFormData({ ...formData, itemName: e.target.value })
             }
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
@@ -141,7 +141,7 @@ export default function OrderForm({ onSubmit }: OrderFormProps) {
               setFormData({ ...formData, quantity: parseInt(e.target.value) })
             }
             disabled={useMultipleColors}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
           />
           {useMultipleColors && (
             <p className="text-xs text-gray-500 mt-1">
@@ -159,7 +159,7 @@ export default function OrderForm({ onSubmit }: OrderFormProps) {
             onChange={(e) =>
               setFormData({ ...formData, filamentType: e.target.value })
             }
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="PLA">PLA</option>
             <option value="ABS">ABS</option>
@@ -181,7 +181,7 @@ export default function OrderForm({ onSubmit }: OrderFormProps) {
               onChange={(e) =>
                 setFormData({ ...formData, filamentColor: e.target.value })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
         )}
@@ -220,14 +220,14 @@ export default function OrderForm({ onSubmit }: OrderFormProps) {
                 value={newColor}
                 onChange={(e) => setNewColor(e.target.value)}
                 placeholder="Color (e.g., Black)"
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <input
                 type="number"
                 value={newColorQty}
                 onChange={(e) => setNewColorQty(parseInt(e.target.value) || 1)}
                 min="1"
-                className="w-20 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-20 px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <button
                 type="button"
@@ -280,7 +280,7 @@ export default function OrderForm({ onSubmit }: OrderFormProps) {
             onChange={(e) =>
               setFormData({ ...formData, printTime: parseFloat(e.target.value) })
             }
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
@@ -297,7 +297,7 @@ export default function OrderForm({ onSubmit }: OrderFormProps) {
             onChange={(e) =>
               setFormData({ ...formData, price: parseFloat(e.target.value) })
             }
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
@@ -311,7 +311,7 @@ export default function OrderForm({ onSubmit }: OrderFormProps) {
               setFormData({ ...formData, notes: e.target.value })
             }
             rows={3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
       </div>

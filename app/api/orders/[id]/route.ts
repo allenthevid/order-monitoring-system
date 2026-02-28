@@ -22,3 +22,23 @@ export async function PATCH(
     return NextResponse.json({ error: 'Failed to update order' }, { status: 500 });
   }
 }
+
+export async function DELETE(
+  request: Request,
+  context: { params: Promise<{ id: string }> }
+) {
+  const { id } = await context.params;
+  
+  try {
+    // Delete order (payments will be cascade deleted due to foreign key)
+    await sql`
+      DELETE FROM orders
+      WHERE id = ${id}
+    `;
+    
+    return NextResponse.json({ success: true, id });
+  } catch (error) {
+    console.error('Error deleting order:', error);
+    return NextResponse.json({ error: 'Failed to delete order' }, { status: 500 });
+  }
+}

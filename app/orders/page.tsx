@@ -15,9 +15,20 @@ export default function OrdersPage() {
   }, []);
 
   const fetchOrders = async () => {
-    const response = await fetch("/api/orders");
-    const data = await response.json();
-    setOrders(data);
+    try {
+      const response = await fetch("/api/orders");
+      const data = await response.json();
+      // Ensure data is an array
+      if (Array.isArray(data)) {
+        setOrders(data);
+      } else {
+        console.error('Orders API did not return an array:', data);
+        setOrders([]);
+      }
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      setOrders([]);
+    }
   };
 
   const handleAddOrder = async (order: Omit<Order, "id">) => {
@@ -38,6 +49,15 @@ export default function OrdersPage() {
       body: JSON.stringify({ status }),
     });
     fetchOrders();
+  };
+
+  const handleDeleteOrder = async (id: string) => {
+    if (confirm('Are you sure you want to delete this order? This action cannot be undone.')) {
+      await fetch(`/api/orders/${id}`, {
+        method: "DELETE",
+      });
+      fetchOrders();
+    }
   };
 
   const handleAddPayment = async (orderId: string, payment: Payment) => {
@@ -134,6 +154,7 @@ export default function OrdersPage() {
             order={order}
             onStatusChange={handleUpdateStatus}
             onAddPayment={handleAddPayment}
+            onDelete={handleDeleteOrder}
           />
         ))}
       </div>

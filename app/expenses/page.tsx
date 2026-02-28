@@ -18,9 +18,19 @@ export default function ExpensesPage() {
   }, []);
 
   const fetchExpenses = async () => {
-    const response = await fetch("/api/expenses");
-    const data = await response.json();
-    setExpenses(data);
+    try {
+      const response = await fetch("/api/expenses");
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        setExpenses(data);
+      } else {
+        console.error('Expenses API did not return an array:', data);
+        setExpenses([]);
+      }
+    } catch (error) {
+      console.error('Error fetching expenses:', error);
+      setExpenses([]);
+    }
   };
 
   const fetchOrders = async () => {

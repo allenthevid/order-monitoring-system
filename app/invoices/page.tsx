@@ -16,15 +16,35 @@ export default function InvoicesPage() {
   }, []);
 
   const fetchInvoices = async () => {
-    const response = await fetch("/api/invoices");
-    const data = await response.json();
-    setInvoices(data);
+    try {
+      const response = await fetch("/api/invoices");
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        setInvoices(data);
+      } else {
+        console.error('Invoices API did not return an array:', data);
+        setInvoices([]);
+      }
+    } catch (error) {
+      console.error('Error fetching invoices:', error);
+      setInvoices([]);
+    }
   };
 
   const fetchOrders = async () => {
-    const response = await fetch("/api/orders");
-    const data = await response.json();
-    setOrders(data.filter((o: Order) => o.status === "completed"));
+    try {
+      const response = await fetch("/api/orders");
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        setOrders(data.filter((o: Order) => o.status === "completed"));
+      } else {
+        console.error('Orders API did not return an array:', data);
+        setOrders([]);
+      }
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      setOrders([]);
+    }
   };
 
   const handleGenerateInvoice = async (invoice: Omit<Invoice, "id" | "invoiceNumber">) => {

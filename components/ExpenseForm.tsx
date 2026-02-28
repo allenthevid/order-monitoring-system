@@ -41,7 +41,7 @@ export default function ExpenseForm({ onSubmit, orders = [] }: ExpenseFormProps)
 
   return (
     <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-xl font-semibold mb-4">Add Expense</h2>
+      <h2 className="text-xl font-semibold text-gray-900 mb-4">Add Expense</h2>
       <div className="grid md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -55,7 +55,7 @@ export default function ExpenseForm({ onSubmit, orders = [] }: ExpenseFormProps)
               setFormData({ ...formData, description: e.target.value })
             }
             placeholder="e.g., PLA Filament purchase"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500"
           />
         </div>
 
@@ -71,7 +71,7 @@ export default function ExpenseForm({ onSubmit, orders = [] }: ExpenseFormProps)
                 category: e.target.value as Expense["category"],
               })
             }
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500"
           >
             <option value="filament">Filament</option>
             <option value="maintenance">Maintenance</option>
@@ -95,7 +95,7 @@ export default function ExpenseForm({ onSubmit, orders = [] }: ExpenseFormProps)
             onChange={(e) =>
               setFormData({ ...formData, amount: parseFloat(e.target.value) })
             }
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500"
           />
         </div>
 
@@ -108,7 +108,7 @@ export default function ExpenseForm({ onSubmit, orders = [] }: ExpenseFormProps)
             required
             value={formData.date}
             onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500"
           />
         </div>
 
@@ -123,7 +123,7 @@ export default function ExpenseForm({ onSubmit, orders = [] }: ExpenseFormProps)
               setFormData({ ...formData, vendor: e.target.value })
             }
             placeholder="e.g., Amazon, Local Store"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500"
           />
         </div>
 
@@ -137,7 +137,7 @@ export default function ExpenseForm({ onSubmit, orders = [] }: ExpenseFormProps)
               onChange={(e) =>
                 setFormData({ ...formData, relatedOrderId: e.target.value })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500"
             >
               <option value="">-- None --</option>
               {orders.map((order) => (
@@ -160,7 +160,7 @@ export default function ExpenseForm({ onSubmit, orders = [] }: ExpenseFormProps)
             }
             rows={3}
             placeholder="Additional details..."
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-500"
           />
         </div>
       </div>

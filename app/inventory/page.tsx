@@ -14,9 +14,19 @@ export default function InventoryPage() {
   }, []);
 
   const fetchFilaments = async () => {
-    const response = await fetch("/api/filaments");
-    const data = await response.json();
-    setFilaments(data);
+    try {
+      const response = await fetch("/api/filaments");
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        setFilaments(data);
+      } else {
+        console.error('Filaments API did not return an array:', data);
+        setFilaments([]);
+      }
+    } catch (error) {
+      console.error('Error fetching filaments:', error);
+      setFilaments([]);
+    }
   };
 
   const handleAddFilament = async (filament: Omit<Filament, "id">) => {

@@ -57,7 +57,7 @@ export default function InvoiceGenerator({
 
   return (
     <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-xl font-semibold mb-4">Generate Invoice</h2>
+      <h2 className="text-xl font-semibold text-gray-900 mb-4">Generate Invoice</h2>
 
       <div className="space-y-4">
         <div>
@@ -68,7 +68,7 @@ export default function InvoiceGenerator({
             required
             value={selectedOrderId}
             onChange={(e) => setSelectedOrderId(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
           >
             <option value="">-- Select a completed order --</option>
             {orders.map((order) => (
@@ -121,7 +121,7 @@ export default function InvoiceGenerator({
               step="0.1"
               value={taxRate * 100}
               onChange={(e) => setTaxRate(parseFloat(e.target.value) / 100)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
           </div>
 
@@ -135,7 +135,7 @@ export default function InvoiceGenerator({
               min="1"
               value={dueInDays}
               onChange={(e) => setDueInDays(parseInt(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
           </div>
         </div>
@@ -171,7 +171,7 @@ export default function InvoiceGenerator({
             onChange={(e) => setNotes(e.target.value)}
             rows={3}
             placeholder="Payment terms, additional information..."
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
           />
         </div>
       </div>

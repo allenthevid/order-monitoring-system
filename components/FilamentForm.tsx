@@ -37,7 +37,7 @@ export default function FilamentForm({ onSubmit }: FilamentFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-xl font-semibold mb-4">Add Filament</h2>
+      <h2 className="text-xl font-semibold text-gray-900 mb-4">Add Filament</h2>
       <div className="grid md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -48,7 +48,7 @@ export default function FilamentForm({ onSubmit }: FilamentFormProps) {
             onChange={(e) =>
               setFormData({ ...formData, type: e.target.value as Filament["type"] })
             }
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500"
           >
             <option value="PLA">PLA</option>
             <option value="ABS">ABS</option>
@@ -69,7 +69,7 @@ export default function FilamentForm({ onSubmit }: FilamentFormProps) {
             onChange={(e) =>
               setFormData({ ...formData, color: e.target.value })
             }
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500"
           />
         </div>
 
@@ -84,7 +84,7 @@ export default function FilamentForm({ onSubmit }: FilamentFormProps) {
             onChange={(e) =>
               setFormData({ ...formData, brand: e.target.value })
             }
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500"
           />
         </div>
 
@@ -100,7 +100,7 @@ export default function FilamentForm({ onSubmit }: FilamentFormProps) {
             onChange={(e) =>
               setFormData({ ...formData, weight: parseInt(e.target.value) })
             }
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500"
           />
         </div>
 
@@ -117,7 +117,7 @@ export default function FilamentForm({ onSubmit }: FilamentFormProps) {
             onChange={(e) =>
               setFormData({ ...formData, costPerKg: parseFloat(e.target.value) })
             }
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500"
           />
         </div>
 
@@ -132,7 +132,7 @@ export default function FilamentForm({ onSubmit }: FilamentFormProps) {
             onChange={(e) =>
               setFormData({ ...formData, supplier: e.target.value })
             }
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500"
           />
         </div>
 
@@ -151,7 +151,7 @@ export default function FilamentForm({ onSubmit }: FilamentFormProps) {
                 lowStockThreshold: parseInt(e.target.value),
               })
             }
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500"
           />
         </div>
       </div>

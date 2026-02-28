@@ -9,9 +9,10 @@ interface OrderCardProps {
   order: Order;
   onStatusChange: (id: string, status: Order["status"]) => void;
   onAddPayment: (orderId: string, payment: Payment) => void;
+  onDelete: (id: string) => void;
 }
 
-export default function OrderCard({ order, onStatusChange, onAddPayment }: OrderCardProps) {
+export default function OrderCard({ order, onStatusChange, onAddPayment, onDelete }: OrderCardProps) {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   const statusColors = {
@@ -175,6 +176,14 @@ export default function OrderCard({ order, onStatusChange, onAddPayment }: Order
                 Cancel
               </button>
             </>
+          )}
+          {(order.status === "completed" || order.status === "cancelled") && (
+            <button
+              onClick={() => onDelete(order.id)}
+              className="flex-1 bg-gray-600 text-white px-3 py-2 rounded text-sm hover:bg-gray-700"
+            >
+              Delete Order
+            </button>
           )}
         </div>
       </div>

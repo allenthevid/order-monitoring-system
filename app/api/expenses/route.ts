@@ -32,7 +32,8 @@ export async function GET() {
     return NextResponse.json(expenses);
   } catch (error) {
     console.error('Error fetching expenses:', error);
-    return NextResponse.json({ error: 'Failed to fetch expenses' }, { status: 500 });
+    // Return empty array to allow app to function without database
+    return NextResponse.json([]);
   }
 }
 

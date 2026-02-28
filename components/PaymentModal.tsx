@@ -38,7 +38,7 @@ export default function PaymentModal({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-        <h3 className="text-xl font-semibold mb-4">Record Payment</h3>
+        <h3 className="text-xl font-semibold text-gray-900 mb-4">Record Payment</h3>
 
         <div className="bg-gray-50 p-4 rounded-md mb-4">
           <div className="flex justify-between text-sm mb-2">
@@ -69,7 +69,7 @@ export default function PaymentModal({
                 onChange={(e) =>
                   setFormData({ ...formData, amount: parseFloat(e.target.value) })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500"
               />
             </div>
 
@@ -85,7 +85,7 @@ export default function PaymentModal({
                     method: e.target.value as PaymentMethod,
                   })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500"
               >
                 <option value="cash">Cash</option>
                 <option value="card">Card</option>
@@ -106,7 +106,7 @@ export default function PaymentModal({
                 onChange={(e) =>
                   setFormData({ ...formData, date: e.target.value })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500"
               />
             </div>
 
@@ -121,7 +121,7 @@ export default function PaymentModal({
                 }
                 rows={2}
                 placeholder="Transaction reference, additional details..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500"
               />
             </div>
           </div>
