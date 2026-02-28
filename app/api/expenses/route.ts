@@ -1,47 +1,66 @@
 import { NextResponse } from "next/server";
-import { Expense } from "@/types";
-
-// In-memory storage (replace with database in production)
-const expenses: Expense[] = [
-  {
-    id: "1",
-    description: "PLA Filament - Black (5 rolls)",
-    category: "filament",
-    amount: 5500.00,
-    date: new Date("2026-02-15"),
-    vendor: "Amazon",
-    notes: "Bulk purchase for next month's orders",
-  },
-  {
-    id: "2",
-    description: "3D Printer Nozzle Set",
-    category: "parts",
-    amount: 1250.00,
-    date: new Date("2026-02-20"),
-    vendor: "3D Printing Store",
-  },
-  {
-    id: "3",
-    description: "Monthly Electricity Bill",
-    category: "electricity",
-    amount: 4500.00,
-    date: new Date("2026-02-01"),
-    vendor: "Electric Company",
-    notes: "Estimated cost for running printers",
-  },
-];
+import { Expense, ExpenseCategory } from "@/types";
+import { sql } from "@/lib/db";
 
 export async function GET() {
-  return NextResponse.json(expenses);
+  try {
+    const expensesData = await sql`
+      SELECT 
+        id,
+        description,
+        category,
+        amount,
+        date,
+        vendor,
+        notes,
+        related_order_id as "relatedOrderId"
+      FROM expenses
+      ORDER BY date DESC
+    `;
+
+    const expenses: Expense[] = expensesData.map((e) => ({
+      id: e.id as string,
+      description: e.description as string,
+      category: e.category as ExpenseCategory,
+      amount: parseFloat(e.amount as string),
+      date: new Date(e.date as string),
+      vendor: e.vendor as string | undefined,
+      notes: e.notes as string | undefined,
+      relatedOrderId: e.relatedOrderId as string | undefined,
+    }));
+
+    return NextResponse.json(expenses);
+  } catch (error) {
+    console.error('Error fetching expenses:', error);
+    return NextResponse.json({ error: 'Failed to fetch expenses' }, { status: 500 });
+  }
 }
 
 export async function POST(request: Request) {
-  const body = await request.json();
-  const newExpense: Expense = {
-    ...body,
-    id: Date.now().toString(),
-    date: new Date(body.date),
-  };
-  expenses.push(newExpense);
-  return NextResponse.json(newExpense, { status: 201 });
+  try {
+    const body = await request.json();
+    const newExpenseId = Date.now().toString();
+
+    await sql`
+      INSERT INTO expenses (
+        id, description, category, amount, date, vendor, notes, related_order_id
+      )
+      VALUES (
+        ${newExpenseId}, ${body.description}, ${body.category}, 
+        ${body.amount}, ${body.date}, ${body.vendor || null}, 
+        ${body.notes || null}, ${body.relatedOrderId || null}
+      )
+    `;
+
+    const newExpense: Expense = {
+      ...body,
+      id: newExpenseId,
+      date: new Date(body.date),
+    };
+
+    return NextResponse.json(newExpense, { status: 201 });
+  } catch (error) {
+    console.error('Error creating expense:', error);
+    return NextResponse.json({ error: 'Failed to create expense' }, { status: 500 });
+  }
 }

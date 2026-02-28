@@ -7,6 +7,7 @@ A comprehensive Next.js application for managing 3D printing orders, filament in
 ### 📦 Order Management
 - Track all 3D printing orders with detailed information
 - Monitor order status (Pending, Printing, Completed, Cancelled)
+- **Multiple color variants** - Order the same item in different colors with individual quantities
 - **Payment tracking** - Record payments with multiple payment methods (Cash, Card, Bank Transfer, PayPal, etc.)
 - **Payment status** - Track unpaid, partial, and fully paid orders
 - **Revenue dashboard** - View total revenue, collected payments, and outstanding amounts
@@ -44,9 +45,11 @@ A comprehensive Next.js application for managing 3D printing orders, filament in
 - **Framework:** Next.js 15 (App Router)
 - **Language:** TypeScript
 - **Styling:** Tailwind CSS
+- **Database:** Neon Postgres (Serverless PostgreSQL)
 - **PDF Generation:** jsPDF with autoTable
 - **Date Handling:** date-fns
 - **Icons:** Heroicons
+- **Deployment:** Vercel
 
 ## Getting Started
 
@@ -62,12 +65,20 @@ A comprehensive Next.js application for managing 3D printing orders, filament in
 npm install
 ```
 
-2. Run the development server:
+2. **Set up the database** (Required for production):
+   - See [DATABASE_SETUP.md](./DATABASE_SETUP.md) for detailed instructions
+   - For Vercel deployment: Create a Neon Postgres database in your project
+   - For local development: Create a `.env.local` file with your `DATABASE_URL`
+   - The database tables will be created automatically on first API request
+
+3. Run the development server:
 ```bash
 npm run dev
 ```
 
-3. Open [http://localhost:3000](http://localhost:3000) in your browser
+4. Open [http://localhost:3000](http://localhost:3000) in your browser
+
+**Note:** The app requires a PostgreSQL database to persist data. Without it, the build will succeed but the app won't function at runtime.
 
 ## Project Structure
 
@@ -111,12 +122,16 @@ order-monitoring-and-inventory/
 2. View revenue dashboard showing total revenue, collected payments, and outstanding amounts
 3. Click "New Order" to create a new 3D printing order
 4. Fill in customer details, item information, and pricing
-5. Track order progress through different statuses
-6. **Record payments**: Click "+ Record Payment" on any order card to add a payment
+5. **Multiple Colors Feature**: Enable "Order multiple colors of the same item" to:
+   - Add the same item in different colors with individual quantities
+   - Example: 2 Black phone stands + 3 Red phone stands in one order
+   - Total quantity is calculated automatically
+6. Track order progress through different statuses
+7. **Record payments**: Click "+ Record Payment" on any order card to add a payment
    - Enter payment amount, method (Cash, Card, Bank Transfer, PayPal, Other)
    - Add payment date and optional notes
    - View payment history in the order card
-7. Update status as the print progresses
+8. Update status as the print progresses
 
 ### Managing Inventory
 
@@ -149,24 +164,53 @@ order-monitoring-and-inventory/
 
 ## Data Storage
 
-Currently, the application uses in-memory storage for demonstration purposes. For production use, you should:
+The application uses **Neon Postgres** (serverless PostgreSQL) for persistent data storage:
 
-1. Integrate a database (PostgreSQL, MongoDB, etc.)
-2. Add authentication and user management
-3. Implement data persistence
-4. Add backup and recovery mechanisms
+- ✅ All data persists across deployments and server restarts
+- ✅ Tables are automatically created on first API request
+- ✅ Sample data seeding included for new databases
+- ✅ Proper relational structure with foreign keys
+- ✅ Indexed for optimal query performance
+
+**Database Tables:**
+- `orders` - Customer orders with color variants support
+- `payments` - Payment records linked to orders
+- `filaments` - Filament inventory tracking
+- `invoices` - Invoice headers
+- `invoice_items` - Invoice line items
+- `expenses` - Business expense tracking
+
+For detailed setup instructions, see [DATABASE_SETUP.md](./DATABASE_SETUP.md)
+
+## Deployment
+
+### Deploy to Vercel
+
+1. Push your code to GitHub
+2. Import your repository in Vercel
+3. Add a Neon Postgres database from the Storage tab
+4. Vercel will automatically set the `DATABASE_URL` environment variable
+5. Deploy! The database will initialize automatically on first request
+
+### Environment Variables
+
+Required:
+- `DATABASE_URL` - PostgreSQL connection string (automatically set by Vercel)
 
 ## Future Enhancements
 
-- [ ] Database integration (PostgreSQL/MongoDB)
+- [x] Database integration (Neon Postgres) ✅
+- [x] Payment tracking ✅
+- [x] Expense management ✅
+- [x] Multiple color variants per order ✅
 - [ ] User authentication
-- [ ] Multi-user support
+- [ ] Multi-user support with permissions
 - [ ] Email notifications for invoices
 - [ ] Advanced reporting and analytics
 - [ ] Print queue management
 - [ ] Material cost calculator
 - [ ] Customer portal
-- [ ] Payment integration
+- [ ] Payment gateway integration (Stripe, PayPal)
 
 ## Contributing
 

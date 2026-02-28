@@ -1,76 +1,69 @@
 import { NextResponse } from "next/server";
-import { Filament } from "@/types";
-
-// In-memory storage (replace with database in production)
-const filaments: Filament[] = [
-  {
-    id: "1",
-    type: "PLA",
-    color: "Black",
-    brand: "Hatchbox",
-    weight: 850,
-    costPerKg: 1100.00,
-    supplier: "Amazon",
-    dateAdded: new Date("2026-01-15"),
-    lowStockThreshold: 200,
-  },
-  {
-    id: "2",
-    type: "PLA",
-    color: "Red",
-    brand: "eSun",
-    weight: 650,
-    costPerKg: 1200.00,
-    supplier: "3D Printing Store",
-    dateAdded: new Date("2026-01-20"),
-    lowStockThreshold: 200,
-  },
-  {
-    id: "3",
-    type: "PETG",
-    color: "Blue",
-    brand: "Overture",
-    weight: 150,
-    costPerKg: 1450.00,
-    supplier: "Amazon",
-    dateAdded: new Date("2026-02-01"),
-    lowStockThreshold: 200,
-  },
-  {
-    id: "4",
-    type: "ABS",
-    color: "White",
-    brand: "Hatchbox",
-    weight: 950,
-    costPerKg: 1250.00,
-    supplier: "Direct from Manufacturer",
-    dateAdded: new Date("2026-02-10"),
-    lowStockThreshold: 200,
-  },
-  {
-    id: "5",
-    type: "TPU",
-    color: "Clear",
-    brand: "NinjaFlex",
-    weight: 500,
-    costPerKg: 1900.00,
-    supplier: "3D Printing Store",
-    dateAdded: new Date("2026-02-15"),
-    lowStockThreshold: 150,
-  },
-];
+import { Filament, FilamentType } from "@/types";
+import { sql } from "@/lib/db";
 
 export async function GET() {
-  return NextResponse.json(filaments);
+  try {
+    const filamentsData = await sql`
+      SELECT 
+        id,
+        type,
+        color,
+        brand,
+        weight,
+        cost_per_kg as "costPerKg",
+        supplier,
+        date_added as "dateAdded",
+        low_stock_threshold as "lowStockThreshold"
+      FROM filaments
+      ORDER BY date_added DESC
+    `;
+
+    const filaments: Filament[] = filamentsData.map((f) => ({
+      id: f.id as string,
+      type: f.type as FilamentType,
+      color: f.color as string,
+      brand: f.brand as string,
+      weight: f.weight as number,
+      costPerKg: parseFloat(f.costPerKg as string),
+      supplier: f.supplier as string,
+      dateAdded: new Date(f.dateAdded as string),
+      lowStockThreshold: f.lowStockThreshold as number,
+    }));
+
+    return NextResponse.json(filaments);
+  } catch (error) {
+    console.error('Error fetching filaments:', error);
+    return NextResponse.json({ error: 'Failed to fetch filaments' }, { status: 500 });
+  }
 }
 
 export async function POST(request: Request) {
-  const body = await request.json();
-  const newFilament: Filament = {
-    ...body,
-    id: Date.now().toString(),
-    dateAdded: new Date(body.dateAdded),
-  };
-  filaments.push(newFilament);
-  return NextResponse.json(newFilament, { status: 201 });
+  try {
+    const body = await request.json();
+    const newFilamentId = Date.now().toString();
+
+    await sql`
+      INSERT INTO filaments (
+        id, type, color, brand, weight, cost_per_kg, 
+        supplier, date_added, low_stock_threshold
+      )
+      VALUES (
+        ${newFilamentId}, ${body.type}, ${body.color}, ${body.brand},
+        ${body.weight}, ${body.costPerKg}, ${body.supplier},
+        ${body.dateAdded}, ${body.lowStockThreshold || 200}
+      )
+    `;
+
+    const newFilament: Filament = {
+      ...body,
+      id: newFilamentId,
+      dateAdded: new Date(body.dateAdded),
+    };
+
+    return NextResponse.json(newFilament, { status: 201 });
+  } catch (error) {
+    console.error('Error creating filament:', error);
+    return NextResponse.json({ error: 'Failed to create filament' }, { status: 500 });
+  }
 }

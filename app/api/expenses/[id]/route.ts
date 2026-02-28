@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { sql } from "@/lib/db";
 
 export async function DELETE(
   request: Request,
@@ -6,6 +7,15 @@ export async function DELETE(
 ) {
   const { id } = await context.params;
   
-  // In a real app, delete from database
-  return NextResponse.json({ success: true, id });
+  try {
+    await sql`
+      DELETE FROM expenses
+      WHERE id = ${id}
+    `;
+    
+    return NextResponse.json({ success: true, id });
+  } catch (error) {
+    console.error('Error deleting expense:', error);
+    return NextResponse.json({ error: 'Failed to delete expense' }, { status: 500 });
+  }
 }

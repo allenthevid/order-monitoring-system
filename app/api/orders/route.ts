@@ -1,86 +1,126 @@
 import { NextResponse } from "next/server";
-import { Order } from "@/types";
+import { Order, ColorVariant, PaymentMethod } from "@/types";
+import { sql } from "@/lib/db";
+import { initializeDatabase, seedDatabase } from "@/lib/init-db";
 
-// In-memory storage (replace with database in production)
-const orders: Order[] = [
-  {
-    id: "1",
-    customerName: "John Smith",
-    email: "john@example.com",
-    itemName: "Custom Phone Stand",
-    quantity: 2,
-    filamentType: "PLA",
-    filamentColor: "Black",
-    printTime: 4.5,
-    price: 1250.00,
-    status: "printing",
-    orderDate: new Date("2026-02-25"),
-    notes: "Customer wants smooth finish",
-    payments: [
-      {
-        amount: 500.00,
-        method: "cash",
-        date: new Date("2026-02-25"),
-        notes: "Partial payment",
-      },
-    ],
-    amountPaid: 500.00,
-    paymentStatus: "partial",
-  },
-  {
-    id: "2",
-    customerName: "Sarah Johnson",
-    email: "sarah@example.com",
-    itemName: "Miniature Dragon",
-    quantity: 1,
-    filamentType: "PLA",
-    filamentColor: "Red",
-    printTime: 12,
-    price: 2250.00,
-    status: "pending",
-    orderDate: new Date("2026-02-26"),
-    payments: [],
-    amountPaid: 0,
-    paymentStatus: "unpaid",
-  },
-  {
-    id: "3",
-    customerName: "Mike Davis",
-    email: "mike@example.com",
-    itemName: "Desk Organizer",
-    quantity: 1,
-    filamentType: "PETG",
-    filamentColor: "Blue",
-    printTime: 6,
-    price: 1500.00,
-    status: "completed",
-    orderDate: new Date("2026-02-20"),
-    completionDate: new Date("2026-02-21"),
-    payments: [
-      {
-        amount: 1500.00,
-        method: "card",
-        date: new Date("2026-02-21"),
-        notes: "Full payment on completion",
-      },
-    ],
-    amountPaid: 1500.00,
-    paymentStatus: "paid",
-  },
-];
+// Initialize database on first request
+let dbInitialized = false;
+
+async function ensureDb() {
+  if (!dbInitialized) {
+    try {
+      await initializeDatabase();
+      await seedDatabase();
+      dbInitialized = true;
+    } catch (error) {
+      console.error('Database initialization error:', error);
+    }
+  }
+}
 
 export async function GET() {
-  return NextResponse.json(orders);
+  await ensureDb();
+  
+  try {
+    // Get all orders
+    const ordersData = await sql`
+      SELECT 
+        id,
+        customer_name as "customerName",
+        email,
+        item_name as "itemName",
+        quantity,
+        filament_type as "filamentType",
+        filament_color as "filamentColor",
+        print_time as "printTime",
+        price,
+        status,
+        order_date as "orderDate",
+        notes,
+        amount_paid as "amountPaid",
+        payment_status as "paymentStatus",
+        color_variants as "colorVariants"
+      FROM orders
+      ORDER BY order_date DESC
+    `;
+
+    // Get payments for each order
+    const orders: Order[] = await Promise.all(
+      ordersData.map(async (order) => {
+        const paymentsData = await sql`
+          SELECT amount, method, date, notes
+          FROM payments
+          WHERE order_id = ${order.id}
+          ORDER BY date DESC
+        `;
+
+        return {
+          id: order.id as string,
+          customerName: order.customerName as string,
+          email: order.email as string,
+          itemName: order.itemName as string,
+          quantity: order.quantity as number,
+          filamentType: order.filamentType as string,
+          filamentColor: order.filamentColor as string,
+          price: parseFloat(order.price as string),
+          printTime: parseFloat(order.printTime as string),
+          amountPaid: parseFloat(order.amountPaid as string),
+          orderDate: new Date(order.orderDate as string),
+          status: order.status as 'pending' | 'printing' | 'completed' | 'cancelled',
+          paymentStatus: order.paymentStatus as 'unpaid' | 'partial' | 'paid',
+          notes: order.notes as string | undefined,
+          colorVariants: order.colorVariants as ColorVariant[] | undefined,
+          payments: paymentsData.map((p) => ({
+            amount: parseFloat(p.amount as string),
+            method: p.method as PaymentMethod,
+            date: new Date(p.date as string),
+            notes: p.notes as string | undefined,
+          })),
+        };
+      })
+    );
+
+    return NextResponse.json(orders);
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    return NextResponse.json({ error: 'Failed to fetch orders' }, { status: 500 });
+  }
 }
 
 export async function POST(request: Request) {
-  const body = await request.json();
-  const newOrder: Order = {
-    ...body,
-    id: Date.now().toString(),
-    orderDate: new Date(body.orderDate),
-    completionDate: body.completionDate ? new Date(body.completionDate) : undefined,
-  };
-  orders.push(newOrder);
-  return NextResponse.json(newOrder, { status: 201 });
+  await ensureDb();
+  
+  try {
+    const body = await request.json();
+    const newOrderId = Date.now().toString();
+
+    await sql`
+      INSERT INTO orders (
+        id, customer_name, email, item_name, quantity, 
+        filament_type, filament_color, print_time, price, 
+        status, order_date, notes, amount_paid, payment_status,
+        color_variants
+      )
+      VALUES (
+        ${newOrderId}, ${body.customerName}, ${body.email}, 
+        ${body.itemName}, ${body.quantity}, ${body.filamentType},
+        ${body.filamentColor}, ${body.printTime}, ${body.price},
+        ${body.status || 'pending'}, ${body.orderDate}, ${body.notes || null},
+        ${body.amountPaid || 0}, ${body.paymentStatus || 'unpaid'},
+        ${body.colorVariants ? JSON.stringify(body.colorVariants) : null}
+      )
+    `;
+
+    const newOrder: Order = {
+      ...body,
+      id: newOrderId,
+      orderDate: new Date(body.orderDate),
+      payments: [],
+    };
+
+    return NextResponse.json(newOrder, { status: 201 });
+  } catch (error) {
+    console.error('Error creating order:', error);
+    return NextResponse.json({ error: 'Failed to create order' }, { status: 500 });
+  }
 }
