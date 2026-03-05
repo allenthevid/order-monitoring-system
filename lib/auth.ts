@@ -31,17 +31,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   pages: {
     signIn: "/login",
   },
-  callbacks: {
-    authorized({ request, auth }) {
-      const { pathname } = request.nextUrl;
-      
-      // Public routes that don't require authentication
-      if (pathname === "/login") return true;
-      
-      // All other routes require authentication
-      return !!auth;
-    },
-  },
   session: {
     strategy: "jwt",
   },
