@@ -38,7 +38,7 @@ export default function InvoicesPage() {
         } else {
           setOrders([]);
         }
-      } catch (error) {
+      } catch {
         if (isMounted) {
           setInvoices([]);
           setOrders([]);
@@ -56,34 +56,6 @@ export default function InvoicesPage() {
       isMounted = false;
     };
   }, []);
-
-  const fetchInvoices = async () => {
-    try {
-      const response = await fetch("/api/invoices");
-      const data = await response.json();
-      if (Array.isArray(data)) {
-        setInvoices(data);
-      } else {
-        setInvoices([]);
-      }
-    } catch (error) {
-      setInvoices([]);
-    }
-  };
-
-  const fetchOrders = async () => {
-    try {
-      const response = await fetch("/api/orders");
-      const data = await response.json();
-      if (Array.isArray(data)) {
-        setOrders(data.filter((o: Order) => o.status === "completed"));
-      } else {
-        setOrders([]);
-      }
-    } catch (error) {
-      setOrders([]);
-    }
-  };
 
   const handleGenerateInvoice = async (invoice: Omit<Invoice, "id" | "invoiceNumber">) => {
     const response = await fetch("/api/invoices", {
