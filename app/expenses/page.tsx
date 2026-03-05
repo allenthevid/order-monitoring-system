@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { Expense, Order } from "@/types";
-import ExpenseCard from "@/components/ExpenseCard";
+import ExpenseRow from "@/components/ExpenseRow";
 import ExpenseForm from "@/components/ExpenseForm";
+import CashSummary from "@/components/CashSummary";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 
 export default function ExpensesPage() {
@@ -11,33 +12,56 @@ export default function ExpensesPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [filterCategory, setFilterCategory] = useState<string>("all");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchExpenses();
-    fetchOrders();
-  }, []);
+    let isMounted = true;
 
-  const fetchExpenses = async () => {
-    try {
-      const response = await fetch("/api/expenses");
-      const data = await response.json();
-      if (Array.isArray(data)) {
-        setExpenses(data);
-      } else {
-        console.error('Expenses API did not return an array:', data);
-        setExpenses([]);
+    async function fetchData() {
+      try {
+        setLoading(true);
+        
+        const [expensesResponse, ordersResponse] = await Promise.all([
+          fetch("/api/expenses"),
+          fetch("/api/orders")
+        ]);
+        
+        const expensesData = await expensesResponse.json();
+        const ordersData = await ordersResponse.json();
+        
+        if (!isMounted) return;
+        
+        if (Array.isArray(expensesData)) {
+          setExpenses(expensesData);
+        } else {
+          console.error('Expenses API did not return an array:', expensesData);
+          setExpenses([]);
+        }
+        
+        if (Array.isArray(ordersData)) {
+          setOrders(ordersData);
+        } else {
+          setOrders([]);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        if (isMounted) {
+          setExpenses([]);
+          setOrders([]);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
-    } catch (error) {
-      console.error('Error fetching expenses:', error);
-      setExpenses([]);
     }
-  };
-
-  const fetchOrders = async () => {
-    const response = await fetch("/api/orders");
-    const data = await response.json();
-    setOrders(data);
-  };
+    
+    fetchData();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleAddExpense = async (expense: Omit<Expense, "id">) => {
     const response = await fetch("/api/expenses", {
@@ -84,116 +108,160 @@ export default function ExpensesPage() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Expenses</h1>
-          <p className="text-gray-600 mt-1">Track all business expenses</p>
+      {loading ? (
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading expenses...</p>
+          </div>
         </div>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
-        >
-          {showForm ? "Cancel" : "Add Expense"}
-        </button>
-      </div>
-
-      {/* Summary Cards */}
-      <div className="grid md:grid-cols-3 gap-6 mb-6">
-        <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-red-500">
-          <h3 className="text-sm font-medium text-gray-600 mb-1">
-            Total Expenses
-          </h3>
-          <p className="text-2xl font-bold text-red-600">
-            ₱{totalExpenses.toFixed(2)}
-          </p>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-orange-500">
-          <h3 className="text-sm font-medium text-gray-600 mb-1">
-            This Month
-          </h3>
-          <p className="text-2xl font-bold text-orange-600">
-            ₱{monthlyExpenses.toFixed(2)}
-          </p>
-          <p className="text-xs text-gray-500 mt-1">
-            {format(new Date(), "MMMM yyyy")}
-          </p>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
-          <h3 className="text-sm font-medium text-gray-600 mb-1">
-            Total Items
-          </h3>
-          <p className="text-2xl font-bold text-blue-600">
-            {expenses.length}
-          </p>
-        </div>
-      </div>
-
-      {/* Category Breakdown */}
-      <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-        <h3 className="text-lg font-semibold mb-4">Expenses by Category</h3>
-        <div className="grid md:grid-cols-3 gap-4">
-          {Object.entries(categoryTotals).map(([category, total]) => (
-            <div key={category} className="flex justify-between items-center">
-              <span className="text-sm capitalize text-gray-700">
-                {category}:
-              </span>
-              <span className="font-semibold text-gray-900">
-                ₱{total.toFixed(2)}
-              </span>
+      ) : (
+        <>
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Expenses</h1>
+              <p className="text-gray-600 mt-1">Track all business expenses</p>
             </div>
-          ))}
-        </div>
-      </div>
-
-      {showForm && (
-        <div className="mb-6">
-          <ExpenseForm
-            onSubmit={handleAddExpense}
-            orders={orders.map((o) => ({
-              id: o.id,
-              itemName: o.itemName,
-              customerName: o.customerName,
-            }))}
-          />
-        </div>
-      )}
-
-      {/* Filter Buttons */}
-      <div className="mb-6 flex flex-wrap gap-2">
-        {["all", "filament", "maintenance", "electricity", "parts", "shipping", "other"].map(
-          (category) => (
             <button
-              key={category}
-              onClick={() => setFilterCategory(category)}
-              className={`px-4 py-2 rounded-md capitalize ${
-                filterCategory === category
-                  ? "bg-red-600 text-white"
-                  : "bg-white text-gray-700 hover:bg-gray-100"
-              }`}
+              onClick={() => setShowForm(!showForm)}
+              className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
             >
-              {category}
+              {showForm ? "Cancel" : "Add Expense"}
             </button>
-          )
-        )}
-      </div>
+          </div>
 
-      {/* Expense Cards */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredExpenses.map((expense) => (
-          <ExpenseCard
-            key={expense.id}
-            expense={expense}
-            onDelete={handleDeleteExpense}
-          />
-        ))}
-      </div>
+          {/* Summary Cards */}
+          <div className="grid md:grid-cols-4 gap-6 mb-6">
+            <CashSummary />
+            
+            <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-red-500">
+              <h3 className="text-sm font-medium text-gray-600 mb-1">
+                Total Expenses
+              </h3>
+              <p className="text-2xl font-bold text-red-600">
+                ₱{totalExpenses.toFixed(2)}
+              </p>
+            </div>
 
-      {filteredExpenses.length === 0 && (
-        <div className="text-center py-12 text-gray-500">
-          No expenses found. Add your first expense!
-        </div>
+            <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-orange-500">
+              <h3 className="text-sm font-medium text-gray-600 mb-1">
+                This Month
+              </h3>
+              <p className="text-2xl font-bold text-orange-600">
+                ₱{monthlyExpenses.toFixed(2)}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                {format(new Date(), "MMMM yyyy")}
+              </p>
+            </div>
+
+            <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
+              <h3 className="text-sm font-medium text-gray-600 mb-1">
+                Total Items
+              </h3>
+              <p className="text-2xl font-bold text-blue-600">
+                {expenses.length}
+              </p>
+            </div>
+          </div>
+
+          {/* Category Breakdown */}
+          <div className="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h3 className="text-lg font-semibold mb-4 text-gray-900">Expenses by Category</h3>
+            <div className="grid md:grid-cols-3 gap-4">
+              {Object.entries(categoryTotals).map(([category, total]) => (
+                <div key={category} className="flex justify-between items-center">
+                  <span className="text-sm capitalize text-gray-700">
+                    {category}:
+                  </span>
+                  <span className="font-semibold text-gray-900">
+                    ₱{total.toFixed(2)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {showForm && (
+            <div className="mb-6">
+              <ExpenseForm
+                onSubmit={handleAddExpense}
+                orders={orders.map((o) => ({
+                  id: o.id,
+                  itemName: o.itemName,
+                  customerName: o.customerName,
+                }))}
+              />
+            </div>
+          )}
+
+          {/* Filter Buttons */}
+          <div className="mb-6 flex flex-wrap gap-2">
+            {["all", "filament", "maintenance", "electricity", "parts", "shipping", "other"].map(
+              (category) => (
+                <button
+                  key={category}
+                  onClick={() => setFilterCategory(category)}
+                  className={`px-4 py-2 rounded-md capitalize ${
+                    filterCategory === category
+                      ? "bg-red-600 text-white"
+                      : "bg-white text-gray-700 hover:bg-gray-100"
+                  }`}
+                >
+                  {category}
+                </button>
+              )
+            )}
+          </div>
+
+          {/* Expense Table */}
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            {filteredExpenses.length === 0 ? (
+              <div className="text-center py-12 text-gray-500">
+                No expenses found. Add your first expense!
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Description
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Category
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Vendor
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Amount
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Date
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {filteredExpenses.map((expense) => (
+                      <ExpenseRow
+                        key={expense.id}
+                        expense={expense}
+                        onDelete={handleDeleteExpense}
+                      />
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </>
       )}
     </div>
   );

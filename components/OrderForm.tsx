@@ -16,7 +16,7 @@ export default function OrderForm({ onSubmit }: OrderFormProps) {
     filamentType: "PLA",
     filamentColor: "",
     printTime: 0,
-    price: 0,
+    pricePerPc: 0,
     notes: "",
   });
 
@@ -44,11 +44,17 @@ export default function OrderForm({ onSubmit }: OrderFormProps) {
     return colorVariants.reduce((sum, variant) => sum + variant.quantity, 0);
   };
 
+  const calculateTotalPrice = () => {
+    const qty = useMultipleColors ? getTotalQuantity() : formData.quantity;
+    return formData.pricePerPc * qty;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     const orderData: Omit<Order, "id"> = {
       ...formData,
+      price: calculateTotalPrice(),
       status: "pending" as const,
       orderDate: new Date(),
       payments: [],
@@ -72,7 +78,7 @@ export default function OrderForm({ onSubmit }: OrderFormProps) {
       filamentType: "PLA",
       filamentColor: "",
       printTime: 0,
-      price: 0,
+      pricePerPc: 0,
       notes: "",
     });
     setColorVariants([]);
@@ -100,11 +106,10 @@ export default function OrderForm({ onSubmit }: OrderFormProps) {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Email *
+            Email
           </label>
           <input
             type="email"
-            required
             value={formData.email}
             onChange={(e) =>
               setFormData({ ...formData, email: e.target.value })
@@ -246,7 +251,7 @@ export default function OrderForm({ onSubmit }: OrderFormProps) {
                     key={index}
                     className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded"
                   >
-                    <span className="text-sm">
+                    <span className="text-sm text-gray-700">
                       <span className="font-medium">{variant.color}</span> - Qty: {variant.quantity}
                     </span>
                     <button
@@ -269,11 +274,10 @@ export default function OrderForm({ onSubmit }: OrderFormProps) {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Print Time (hours) *
+            Print Time (hours)
           </label>
           <input
             type="number"
-            required
             min="0"
             step="0.5"
             value={formData.printTime}
@@ -286,19 +290,36 @@ export default function OrderForm({ onSubmit }: OrderFormProps) {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Price (₱) *
+            Price per Piece (₱) *
           </label>
           <input
             type="number"
             required
             min="0"
             step="0.01"
-            value={formData.price}
+            value={formData.pricePerPc}
             onChange={(e) =>
-              setFormData({ ...formData, price: parseFloat(e.target.value) })
+              setFormData({ ...formData, pricePerPc: parseFloat(e.target.value) || 0 })
             }
             className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Total Price (₱)
+          </label>
+          <input
+            type="text"
+            value={`₱${calculateTotalPrice().toFixed(2)}`}
+            disabled
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-gray-100 font-semibold"
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            {formData.pricePerPc > 0 && (
+              <>₱{formData.pricePerPc.toFixed(2)} × {useMultipleColors ? getTotalQuantity() : formData.quantity} = ₱{calculateTotalPrice().toFixed(2)}</>
+            )}
+          </p>
         </div>
 
         <div className="md:col-span-2">

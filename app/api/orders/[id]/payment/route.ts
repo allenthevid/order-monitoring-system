@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { Payment } from "@/types";
-import { sql } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 
 export async function POST(
   request: Request,
@@ -10,24 +10,29 @@ export async function POST(
   const payment: Payment = await request.json();
   
   try {
-    // Insert payment
-    await sql`
-      INSERT INTO payments (order_id, amount, method, date, notes)
-      VALUES (${id}, ${payment.amount}, ${payment.method}, ${payment.date}, ${payment.notes || null})
-    `;
+    // Get order
+    const order = await prisma.order.findUnique({
+      where: { id }
+    });
     
-    // Get order price and current amount paid
-    const orderData = await sql`
-      SELECT price, amount_paid FROM orders WHERE id = ${id}
-    `;
-    
-    if (orderData.length === 0) {
+    if (!order) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });
     }
     
-    const order = orderData[0];
-    const newAmountPaid = parseFloat(order.amount_paid as string) + payment.amount;
-    const price = parseFloat(order.price as string);
+    // Create payment
+    await prisma.payment.create({
+      data: {
+        orderId: id,
+        amount: payment.amount,
+        method: payment.method,
+        date: new Date(payment.date),
+        notes: payment.notes
+      }
+    });
+    
+    // Calculate new amount paid
+    const newAmountPaid = Number(order.amountPaid) + payment.amount;
+    const price = Number(order.price);
     
     // Determine payment status
     let paymentStatus = 'unpaid';
@@ -38,13 +43,14 @@ export async function POST(
     }
     
     // Update order
-    await sql`
-      UPDATE orders
-      SET amount_paid = ${newAmountPaid},
-          payment_status = ${paymentStatus},
-          updated_at = NOW()
-      WHERE id = ${id}
-    `;
+    await prisma.order.update({
+      where: { id },
+      data: {
+        amountPaid: newAmountPaid,
+        paymentStatus,
+        updatedAt: new Date()
+      }
+    });
     
     return NextResponse.json({ success: true, id, payment });
   } catch (error) {

@@ -1,40 +1,22 @@
 import { NextResponse } from "next/server";
-import { Filament, FilamentType } from "@/types";
-import { sql } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   try {
-    const filamentsData = await sql`
-      SELECT 
-        id,
-        type,
-        color,
-        brand,
-        weight,
-        cost_per_kg as "costPerKg",
-        supplier,
-        date_added as "dateAdded",
-        low_stock_threshold as "lowStockThreshold"
-      FROM filaments
-      ORDER BY date_added DESC
-    `;
+    const filaments = await prisma.filament.findMany({
+      orderBy: {
+        dateAdded: 'desc'
+      }
+    });
 
-    const filaments: Filament[] = filamentsData.map((f) => ({
-      id: f.id as string,
-      type: f.type as FilamentType,
-      color: f.color as string,
-      brand: f.brand as string,
-      weight: f.weight as number,
-      costPerKg: parseFloat(f.costPerKg as string),
-      supplier: f.supplier as string,
-      dateAdded: new Date(f.dateAdded as string),
-      lowStockThreshold: f.lowStockThreshold as number,
+    const serializedFilaments = filaments.map((filament: any) => ({
+      ...filament,
+      costPerKg: Number(filament.costPerKg)
     }));
 
-    return NextResponse.json(filaments);
+    return NextResponse.json(serializedFilaments);
   } catch (error) {
     console.error('Error fetching filaments:', error);
-    // Return empty array to allow app to function without database
     return NextResponse.json([]);
   }
 }
@@ -42,27 +24,26 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const newFilamentId = Date.now().toString();
 
-    await sql`
-      INSERT INTO filaments (
-        id, type, color, brand, weight, cost_per_kg, 
-        supplier, date_added, low_stock_threshold
-      )
-      VALUES (
-        ${newFilamentId}, ${body.type}, ${body.color}, ${body.brand},
-        ${body.weight}, ${body.costPerKg}, ${body.supplier},
-        ${body.dateAdded}, ${body.lowStockThreshold || 200}
-      )
-    `;
+    const filament = await prisma.filament.create({
+      data: {
+        type: body.type,
+        color: body.color,
+        brand: body.brand,
+        weight: body.weight,
+        costPerKg: body.costPerKg,
+        supplier: body.supplier,
+        dateAdded: new Date(body.dateAdded),
+        lowStockThreshold: body.lowStockThreshold || 200
+      }
+    });
 
-    const newFilament: Filament = {
-      ...body,
-      id: newFilamentId,
-      dateAdded: new Date(body.dateAdded),
+    const serializedFilament = {
+      ...filament,
+      costPerKg: Number(filament.costPerKg)
     };
 
-    return NextResponse.json(newFilament, { status: 201 });
+    return NextResponse.json(serializedFilament, { status: 201 });
   } catch (error) {
     console.error('Error creating filament:', error);
     return NextResponse.json({ error: 'Failed to create filament' }, { status: 500 });

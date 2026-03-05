@@ -81,7 +81,17 @@ CREATE TABLE IF NOT EXISTS expenses (
   category VARCHAR(50) NOT NULL,
   amount DECIMAL(10, 2) NOT NULL,
   date TIMESTAMP NOT NULL DEFAULT NOW(),
+  vendor VARCHAR(255),
   notes TEXT,
+  related_order_id VARCHAR(255) REFERENCES orders(id) ON DELETE SET NULL,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Settings table
+CREATE TABLE IF NOT EXISTS settings (
+  key VARCHAR(255) PRIMARY KEY,
+  value TEXT NOT NULL,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );

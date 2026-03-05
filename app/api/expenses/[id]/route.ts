@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { sql } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 
 export async function DELETE(
   request: Request,
@@ -8,10 +8,9 @@ export async function DELETE(
   const { id } = await context.params;
   
   try {
-    await sql`
-      DELETE FROM expenses
-      WHERE id = ${id}
-    `;
+    await prisma.expense.delete({
+      where: { id }
+    });
     
     return NextResponse.json({ success: true, id });
   } catch (error) {

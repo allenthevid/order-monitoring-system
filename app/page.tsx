@@ -1,4 +1,5 @@
 import Link from "next/link";
+import CashSummary from "@/components/CashSummary";
 
 export default function Home() {
   return (
@@ -10,6 +11,11 @@ export default function Home() {
         <p className="text-xl text-gray-600">
           Manage orders, track payments, monitor inventory, generate invoices, and control expenses
         </p>
+      </div>
+
+      {/* Cash Summary */}
+      <div className="mb-8">
+        <CashSummary />
       </div>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">

@@ -26,7 +26,7 @@ export default function InvoiceGenerator({
 
     const items: InvoiceItem[] = [
       {
-        description: `${selectedOrder.itemName} (${selectedOrder.filamentColor} ${selectedOrder.filamentType})`,
+        description: `${selectedOrder.itemName} (${selectedOrder.filamentColor} ${selectedOrder.filamentType}) - ${selectedOrder.printTime}h print time`,
         quantity: selectedOrder.quantity,
         unitPrice: selectedOrder.price / selectedOrder.quantity,
         total: selectedOrder.price,
@@ -99,6 +99,10 @@ export default function InvoiceGenerator({
               <p>
                 <span className="font-medium">Quantity:</span>{" "}
                 {selectedOrder.quantity}
+              </p>
+              <p>
+                <span className="font-medium">Print Time:</span>{" "}
+                {selectedOrder.printTime}h
               </p>
               <p>
                 <span className="font-medium">Price:</span> ₱

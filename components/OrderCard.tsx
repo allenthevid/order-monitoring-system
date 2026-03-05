@@ -10,9 +10,10 @@ interface OrderCardProps {
   onStatusChange: (id: string, status: Order["status"]) => void;
   onAddPayment: (orderId: string, payment: Payment) => void;
   onDelete: (id: string) => void;
+  onEdit: (order: Order) => void;
 }
 
-export default function OrderCard({ order, onStatusChange, onAddPayment, onDelete }: OrderCardProps) {
+export default function OrderCard({ order, onStatusChange, onAddPayment, onDelete, onEdit }: OrderCardProps) {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   const statusColors = {
@@ -69,8 +70,8 @@ export default function OrderCard({ order, onStatusChange, onAddPayment, onDelet
             <div>
               <span className="font-medium">Colors:</span>
               <div className="ml-4 mt-1 space-y-1">
-                {order.colorVariants.map((variant, idx) => (
-                  <div key={idx} className="text-xs">
+                {order.colorVariants.map((variant) => (
+                  <div key={`${variant.color}-${variant.quantity}`} className="text-xs">
                     • {variant.color} - Qty: {variant.quantity}
                   </div>
                 ))}
@@ -130,7 +131,7 @@ export default function OrderCard({ order, onStatusChange, onAddPayment, onDelet
               <div className="mt-2 space-y-1">
                 {order.payments.map((payment, idx) => (
                   <div
-                    key={idx}
+                    key={payment.id || `payment-${idx}`}
                     className="text-xs bg-gray-50 p-2 rounded flex justify-between"
                   >
                     <span>
@@ -153,6 +154,12 @@ export default function OrderCard({ order, onStatusChange, onAddPayment, onDelet
         <div className="flex gap-2">
           {order.status !== "completed" && order.status !== "cancelled" && (
             <>
+              <button
+                onClick={() => onEdit(order)}
+                className="flex-1 bg-gray-600 text-white px-3 py-2 rounded text-sm hover:bg-gray-700"
+              >
+                Edit
+              </button>
               {order.status === "pending" && (
                 <button
                   onClick={() => onStatusChange(order.id, "printing")}

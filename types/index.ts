@@ -4,6 +4,7 @@ export type PaymentMethod = 'cash' | 'card' | 'bank_transfer' | 'paypal' | 'othe
 export type PaymentStatus = 'unpaid' | 'partial' | 'paid';
 
 export interface Payment {
+  id?: number;
   amount: number;
   method: PaymentMethod;
   date: Date;

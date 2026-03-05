@@ -1,0 +1,126 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Order {
+  id            String    @id @default(cuid())
+  customerName  String    @map("customer_name")
+  email         String
+  itemName      String    @map("item_name")
+  quantity      Int
+  filamentType  String    @map("filament_type")
+  filamentColor String    @map("filament_color")
+  printTime     Float     @map("print_time")
+  price         Float
+  status        String    @default("pending")
+  orderDate     DateTime  @default(now()) @map("order_date")
+  notes         String?
+  amountPaid    Float     @default(0) @map("amount_paid")
+  paymentStatus String    @default("unpaid") @map("payment_status")
+  colorVariants String?   @map("color_variants")
+  createdAt     DateTime? @default(now()) @map("created_at")
+  updatedAt     DateTime? @default(now()) @updatedAt @map("updated_at")
+  expenses      Expense[]
+  payments      Payment[]
+
+  @@index([orderDate], map: "idx_orders_order_date")
+  @@index([paymentStatus], map: "idx_orders_payment_status")
+  @@index([status], map: "idx_orders_status")
+  @@map("orders")
+}
+
+model Payment {
+  id        Int       @id @default(autoincrement())
+  orderId   String    @map("order_id")
+  amount    Float
+  method    String
+  date      DateTime  @default(now())
+  notes     String?
+  createdAt DateTime? @default(now()) @map("created_at")
+  order     Order     @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([orderId], map: "idx_payments_order_id")
+  @@map("payments")
+}
+
+model Filament {
+  id                String    @id @default(cuid())
+  type              String
+  color             String
+  brand             String
+  weight            Int
+  costPerKg         Float     @map("cost_per_kg")
+  supplier          String
+  dateAdded         DateTime  @default(now()) @map("date_added")
+  lowStockThreshold Int       @default(200) @map("low_stock_threshold")
+  createdAt         DateTime? @default(now()) @map("created_at")
+  updatedAt         DateTime? @default(now()) @updatedAt @map("updated_at")
+
+  @@map("filaments")
+}
+
+model Invoice {
+  id            String        @id @default(cuid())
+  orderId       String        @map("order_id")
+  invoiceNumber String        @unique @map("invoice_number")
+  customerName  String        @map("customer_name")
+  customerEmail String        @map("customer_email")
+  date          DateTime      @default(now())
+  dueDate       DateTime      @map("due_date")
+  subtotal      Float
+  tax           Float
+  total         Float
+  status        String        @default("draft")
+  notes         String?
+  createdAt     DateTime?     @default(now()) @map("created_at")
+  updatedAt     DateTime?     @default(now()) @updatedAt @map("updated_at")
+  items         InvoiceItem[]
+
+  @@map("invoices")
+}
+
+model InvoiceItem {
+  id          Int       @id @default(autoincrement())
+  invoiceId   String    @map("invoice_id")
+  description String
+  quantity    Int
+  unitPrice   Float     @map("unit_price")
+  total       Float
+  createdAt   DateTime? @default(now()) @map("created_at")
+  invoice     Invoice   @relation(fields: [invoiceId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([invoiceId], map: "idx_invoice_items_invoice_id")
+  @@map("invoice_items")
+}
+
+model Expense {
+  id             String    @id @default(cuid())
+  description    String
+  category       String
+  amount         Float
+  date           DateTime  @default(now())
+  vendor         String?
+  notes          String?
+  relatedOrderId String?   @map("related_order_id")
+  createdAt      DateTime? @default(now()) @map("created_at")
+  updatedAt      DateTime? @default(now()) @updatedAt @map("updated_at")
+  order          Order?    @relation(fields: [relatedOrderId], references: [id], onUpdate: NoAction)
+
+  @@index([category], map: "idx_expenses_category")
+  @@index([date], map: "idx_expenses_date")
+  @@map("expenses")
+}
+
+model Setting {
+  key       String    @id
+  value     String
+  createdAt DateTime? @default(now()) @map("created_at")
+  updatedAt DateTime? @default(now()) @updatedAt @map("updated_at")
+
+  @@map("settings")
+}
