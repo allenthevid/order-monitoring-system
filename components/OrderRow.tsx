@@ -123,13 +123,29 @@ export default function OrderRow({ order, onStatusChange, onAddPayment, onDelete
               </>
             )}
             {(order.status === "completed" || order.status === "cancelled") && (
-              <button
-                onClick={() => onDelete(order.id)}
-                className="text-gray-600 hover:text-gray-900 px-2 py-1"
-                title="Delete"
-              >
-                🗑️
-              </button>
+              <>
+                <button
+                  onClick={() => onStatusChange(order.id, "pending")}
+                  className="text-yellow-600 hover:text-yellow-900 px-2 py-1"
+                  title="Revert to Pending"
+                >
+                  ⏮️
+                </button>
+                <button
+                  onClick={() => onStatusChange(order.id, "printing")}
+                  className="text-blue-600 hover:text-blue-900 px-2 py-1"
+                  title="Revert to Printing"
+                >
+                  ▶️
+                </button>
+                <button
+                  onClick={() => onDelete(order.id)}
+                  className="text-gray-600 hover:text-gray-900 px-2 py-1"
+                  title="Delete"
+                >
+                  🗑️
+                </button>
+              </>
             )}
             <button
               onClick={() => setShowDetails(!showDetails)}

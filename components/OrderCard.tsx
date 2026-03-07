@@ -185,12 +185,26 @@ export default function OrderCard({ order, onStatusChange, onAddPayment, onDelet
             </>
           )}
           {(order.status === "completed" || order.status === "cancelled") && (
-            <button
-              onClick={() => onDelete(order.id)}
-              className="flex-1 bg-gray-600 text-white px-3 py-2 rounded text-sm hover:bg-gray-700"
-            >
-              Delete Order
-            </button>
+            <>
+              <button
+                onClick={() => onStatusChange(order.id, "pending")}
+                className="flex-1 bg-yellow-600 text-white px-3 py-2 rounded text-sm hover:bg-yellow-700"
+              >
+                Revert to Pending
+              </button>
+              <button
+                onClick={() => onStatusChange(order.id, "printing")}
+                className="flex-1 bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700"
+              >
+                Revert to Printing
+              </button>
+              <button
+                onClick={() => onDelete(order.id)}
+                className="flex-1 bg-gray-600 text-white px-3 py-2 rounded text-sm hover:bg-gray-700"
+              >
+                Delete Order
+              </button>
+            </>
           )}
         </div>
       </div>

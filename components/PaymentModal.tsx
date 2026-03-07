@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Payment, PaymentMethod } from "@/types";
 
 interface PaymentModalProps {
@@ -18,12 +19,18 @@ export default function PaymentModal({
   onAddPayment,
   onClose,
 }: PaymentModalProps) {
+  const [mounted, setMounted] = useState(false);
   const [formData, setFormData] = useState({
     amount: amountRemaining,
     method: "cash" as PaymentMethod,
     date: new Date().toISOString().split("T")[0],
     notes: "",
   });
+
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +42,9 @@ export default function PaymentModal({
     onClose();
   };
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
         <h3 className="text-xl font-semibold text-gray-900 mb-4">Record Payment</h3>
@@ -143,6 +152,7 @@ export default function PaymentModal({
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

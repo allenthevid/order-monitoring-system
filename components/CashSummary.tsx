@@ -3,38 +3,32 @@
 import { useState, useEffect } from "react";
 import { Order, Expense } from "@/types";
 
-export default function CashSummary() {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [expenses, setExpenses] = useState<Expense[]>([]);
+interface CashSummaryProps {
+  orders: Order[];
+  expenses: Expense[];
+}
+
+export default function CashSummary({ orders, expenses }: CashSummaryProps) {
   const [startingBalance, setStartingBalance] = useState(0);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState("0");
 
   useEffect(() => {
-    fetchData();
+    fetchSettings();
   }, []);
 
-  const fetchData = async () => {
+  const fetchSettings = async () => {
     try {
-      const [ordersResponse, expensesResponse, settingsResponse] = await Promise.all([
-        fetch("/api/orders"),
-        fetch("/api/expenses"),
-        fetch("/api/settings"),
-      ]);
-      
-      const ordersData = await ordersResponse.json();
-      const expensesData = await expensesResponse.json();
+      const settingsResponse = await fetch("/api/settings");
       const settingsData = await settingsResponse.json();
       
-      if (Array.isArray(ordersData)) setOrders(ordersData);
-      if (Array.isArray(expensesData)) setExpenses(expensesData);
       if (settingsData.startingBalance !== undefined) {
         setStartingBalance(settingsData.startingBalance);
         setEditValue(settingsData.startingBalance.toString());
       }
     } catch (error) {
-      console.error("Error fetching cash data:", error);
+      console.error("Error fetching settings:", error);
     } finally {
       setLoading(false);
     }

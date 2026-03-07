@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Order, Payment } from "@/types";
+import { Order, Payment, Expense } from "@/types";
 import OrderRow from "@/components/OrderRow";
 import OrderForm from "@/components/OrderForm";
 import OrderEditForm from "@/components/OrderEditForm";
@@ -9,6 +9,7 @@ import CashSummary from "@/components/CashSummary";
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const [filter, setFilter] = useState<string>("all");
@@ -20,22 +21,33 @@ export default function OrdersPage() {
     async function fetchData() {
       try {
         setLoading(true);
-        const response = await fetch("/api/orders");
-        const data = await response.json();
+        const [ordersResponse, expensesResponse] = await Promise.all([
+          fetch("/api/orders"),
+          fetch("/api/expenses")
+        ]);
+        const ordersData = await ordersResponse.json();
+        const expensesData = await expensesResponse.json();
         
         if (!isMounted) return;
         
         // Ensure data is an array
-        if (Array.isArray(data)) {
-          setOrders(data);
+        if (Array.isArray(ordersData)) {
+          setOrders(ordersData);
         } else {
-          console.error('Orders API did not return an array:', data);
+          console.error('Orders API did not return an array:', ordersData);
           setOrders([]);
         }
+        
+        if (Array.isArray(expensesData)) {
+          setExpenses(expensesData);
+        } else {
+          setExpenses([]);
+        }
       } catch (error) {
-        console.error('Error fetching orders:', error);
+        console.error('Error fetching data:', error);
         if (isMounted) {
           setOrders([]);
+          setExpenses([]);
         }
       } finally {
         if (isMounted) {
@@ -53,18 +65,28 @@ export default function OrdersPage() {
 
   const fetchOrders = async () => {
     try {
-      const response = await fetch("/api/orders");
-      const data = await response.json();
+      const [ordersResponse, expensesResponse] = await Promise.all([
+        fetch("/api/orders"),
+        fetch("/api/expenses")
+      ]);
+      const ordersData = await ordersResponse.json();
+      const expensesData = await expensesResponse.json();
       // Ensure data is an array
-      if (Array.isArray(data)) {
-        setOrders(data);
+      if (Array.isArray(ordersData)) {
+        setOrders(ordersData);
       } else {
-        console.error('Orders API did not return an array:', data);
+        console.error('Orders API did not return an array:', ordersData);
         setOrders([]);
       }
+      if (Array.isArray(expensesData)) {
+        setExpenses(expensesData);
+      } else {
+        setExpenses([]);
+      }
     } catch (error) {
-      console.error('Error fetching orders:', error);
+      console.error('Error fetching data:', error);
       setOrders([]);
+      setExpenses([]);
     }
   };
 
@@ -178,7 +200,7 @@ export default function OrdersPage() {
 
       {/* Revenue Summary */}
       <div className="grid md:grid-cols-4 gap-4 mb-6">
-        <CashSummary />
+        <CashSummary orders={orders} expenses={expenses} />
         
         <div className="bg-white p-4 rounded-lg shadow-md border-l-4 border-blue-500">
           <h3 className="text-sm font-medium text-gray-600 mb-1">
