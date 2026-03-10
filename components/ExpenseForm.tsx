@@ -1,14 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Expense } from "@/types";
 
 interface ExpenseFormProps {
-  onSubmit: (expense: Omit<Expense, "id">) => void;
+  onSubmit: (expense: Omit<Expense, "id"> | Expense) => void;
+  onCancel?: () => void;
+  expense?: Expense;
   orders?: Array<{ id: string; itemName: string; customerName: string }>;
 }
 
-export default function ExpenseForm({ onSubmit, orders = [] }: ExpenseFormProps) {
+export default function ExpenseForm({ onSubmit, onCancel, expense, orders = [] }: ExpenseFormProps) {
   const [formData, setFormData] = useState({
     description: "",
     category: "other" as Expense["category"],
@@ -19,29 +21,60 @@ export default function ExpenseForm({ onSubmit, orders = [] }: ExpenseFormProps)
     relatedOrderId: "",
   });
 
+  useEffect(() => {
+    if (expense) {
+      setFormData({
+        description: expense.description,
+        category: expense.category,
+        amount: expense.amount,
+        date: new Date(expense.date).toISOString().split("T")[0],
+        vendor: expense.vendor || "",
+        notes: expense.notes || "",
+        relatedOrderId: expense.relatedOrderId || "",
+      });
+    }
+  }, [expense]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({
+    const expenseData = {
       ...formData,
       date: new Date(formData.date),
       vendor: formData.vendor || undefined,
       notes: formData.notes || undefined,
       relatedOrderId: formData.relatedOrderId || undefined,
-    });
-    setFormData({
-      description: "",
-      category: "other",
-      amount: 0,
-      date: new Date().toISOString().split("T")[0],
-      vendor: "",
-      notes: "",
-      relatedOrderId: "",
-    });
+    };
+    
+    if (expense) {
+      onSubmit({ ...expenseData, id: expense.id });
+    } else {
+      onSubmit(expenseData);
+      setFormData({
+        description: "",
+        category: "other",
+        amount: 0,
+        date: new Date().toISOString().split("T")[0],
+        vendor: "",
+        notes: "",
+        relatedOrderId: "",
+      });
+    }
   };
 
   return (
     <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-xl font-semibold text-gray-900 mb-4">Add Expense</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold text-gray-900">{expense ? "Edit Expense" : "Add Expense"}</h2>
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            className="text-gray-600 hover:text-gray-900"
+          >
+            ✕
+          </button>
+        )}
+      </div>
       <div className="grid md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -165,12 +198,23 @@ export default function ExpenseForm({ onSubmit, orders = [] }: ExpenseFormProps)
         </div>
       </div>
 
-      <button
-        type="submit"
-        className="mt-4 w-full bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
-      >
-        Add Expense
-      </button>
+      <div className="flex gap-2">
+        <button
+          type="submit"
+          className="flex-1 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
+        >
+          {expense ? "Update Expense" : "Add Expense"}
+        </button>
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+          >
+            Cancel
+          </button>
+        )}
+      </div>
     </form>
   );
 }

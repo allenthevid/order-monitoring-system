@@ -5,10 +5,11 @@ import { format } from "date-fns";
 
 interface ExpenseRowProps {
   expense: Expense;
+  onEdit?: (expense: Expense) => void;
   onDelete?: (id: string) => void;
 }
 
-export default function ExpenseRow({ expense, onDelete }: ExpenseRowProps) {
+export default function ExpenseRow({ expense, onEdit, onDelete }: ExpenseRowProps) {
   const categoryColors = {
     filament: "bg-purple-100 text-purple-800",
     maintenance: "bg-orange-100 text-orange-800",
@@ -55,15 +56,26 @@ export default function ExpenseRow({ expense, onDelete }: ExpenseRowProps) {
         {format(new Date(expense.date), "MMM dd, yyyy")}
       </td>
       <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
-        {onDelete && (
-          <button
-            onClick={() => onDelete(expense.id)}
-            className="text-red-600 hover:text-red-900"
-            title="Delete"
-          >
-            🗑️
-          </button>
-        )}
+        <div className="flex justify-end gap-2">
+          {onEdit && (
+            <button
+              onClick={() => onEdit(expense)}
+              className="text-blue-600 hover:text-blue-900"
+              title="Edit"
+            >
+              ✏️
+            </button>
+          )}
+          {onDelete && (
+            <button
+              onClick={() => onDelete(expense.id)}
+              className="text-red-600 hover:text-red-900"
+              title="Delete"
+            >
+              🗑️
+            </button>
+          )}
+        </div>
       </td>
     </tr>
   );

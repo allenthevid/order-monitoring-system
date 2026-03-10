@@ -11,6 +11,7 @@ export default function ExpensesPage() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [showForm, setShowForm] = useState(false);
+  const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [filterCategory, setFilterCategory] = useState<string>("all");
   const [loading, setLoading] = useState(true);
 
@@ -63,14 +64,32 @@ export default function ExpensesPage() {
     };
   }, []);
 
-  const handleAddExpense = async (expense: Omit<Expense, "id">) => {
-    const response = await fetch("/api/expenses", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(expense),
-    });
-    const newExpense = await response.json();
-    setExpenses([...expenses, newExpense]);
+  const handleAddExpense = async (expense: Omit<Expense, "id"> | Expense) => {
+    if ("id" in expense) {
+      // Update existing expense
+      const response = await fetch(`/api/expenses/${expense.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(expense),
+      });
+      const updatedExpense = await response.json();
+      setExpenses(expenses.map((e) => e.id === expense.id ? updatedExpense : e));
+      setEditingExpense(null);
+    } else {
+      // Add new expense
+      const response = await fetch("/api/expenses", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(expense),
+      });
+      const newExpense = await response.json();
+      setExpenses([...expenses, newExpense]);
+      setShowForm(false);
+    }
+  };
+
+  const handleEditExpense = (expense: Expense) => {
+    setEditingExpense(expense);
     setShowForm(false);
   };
 
@@ -123,7 +142,10 @@ export default function ExpensesPage() {
               <p className="text-gray-600 mt-1">Track all business expenses</p>
             </div>
             <button
-              onClick={() => setShowForm(!showForm)}
+              onClick={() => {
+                setShowForm(!showForm);
+                setEditingExpense(null);
+              }}
               className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
             >
               {showForm ? "Cancel" : "Add Expense"}
@@ -195,6 +217,21 @@ export default function ExpensesPage() {
             </div>
           )}
 
+          {editingExpense && (
+            <div className="mb-6">
+              <ExpenseForm
+                expense={editingExpense}
+                onSubmit={handleAddExpense}
+                onCancel={() => setEditingExpense(null)}
+                orders={orders.map((o) => ({
+                  id: o.id,
+                  itemName: o.itemName,
+                  customerName: o.customerName,
+                }))}
+              />
+            </div>
+          )}
+
           {/* Filter Buttons */}
           <div className="mb-6 flex flex-wrap gap-2">
             {["all", "filament", "maintenance", "electricity", "parts", "shipping", "other"].map(
@@ -253,6 +290,7 @@ export default function ExpensesPage() {
                       <ExpenseRow
                         key={expense.id}
                         expense={expense}
+                        onEdit={handleEditExpense}
                         onDelete={handleDeleteExpense}
                       />
                     ))}
