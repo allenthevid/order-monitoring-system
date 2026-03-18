@@ -6,7 +6,14 @@ declare global {
 }
 
 // Determine which database to use based on DATABASE_URL
-const databaseUrl = process.env.DATABASE_URL || ''
+const databaseUrl = process.env.DATABASE_URL
+
+if (!databaseUrl) {
+  throw new Error(
+    "Missing DATABASE_URL environment variable. Set it in your .env or in your deployment platform (e.g., Vercel)."
+  )
+}
+
 const isNeonDatabase = databaseUrl.includes('neon.tech')
 
 if (isNeonDatabase) {
