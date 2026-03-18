@@ -56,7 +56,14 @@ export default function IncomeRow({ income, onEdit, onDelete }: IncomeRowProps) 
         +₱{(income.amount || 0).toFixed(2)}
       </td>
       <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-        {format(new Date(income.date), "MMM dd, yyyy")}
+        {(() => {
+          try {
+            const date = new Date(income.date);
+            return isNaN(date.getTime()) ? "Invalid Date" : format(date, "MMM dd, yyyy");
+          } catch {
+            return "Invalid Date";
+          }
+        })()}
       </td>
       <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
         <div className="flex justify-end gap-2">

@@ -27,7 +27,14 @@ export default function IncomeForm({ onSubmit, onCancel, income, orders = [] }: 
         description: income.description,
         category: income.category,
         amount: income.amount || 0,
-        date: new Date(income.date).toISOString().split("T")[0],
+        date: (() => {
+          try {
+            const date = new Date(income.date);
+            return isNaN(date.getTime()) ? new Date().toISOString().split("T")[0] : date.toISOString().split("T")[0];
+          } catch {
+            return new Date().toISOString().split("T")[0];
+          }
+        })(),
         customerName: income.customerName || "",
         notes: income.notes || "",
         relatedOrderId: income.relatedOrderId || "",
