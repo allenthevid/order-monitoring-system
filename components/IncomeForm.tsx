@@ -26,7 +26,7 @@ export default function IncomeForm({ onSubmit, onCancel, income, orders = [] }: 
       setFormData({
         description: income.description,
         category: income.category,
-        amount: income.amount,
+        amount: income.amount || 0,
         date: new Date(income.date).toISOString().split("T")[0],
         customerName: income.customerName || "",
         notes: income.notes || "",

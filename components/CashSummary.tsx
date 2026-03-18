@@ -53,7 +53,7 @@ export default function CashSummary({ orders, expenses, income = [] }: CashSumma
 
   // Calculate cash: starting balance + payments received + other income - expenses
   const totalPaymentsReceived = orders.reduce((sum, order) => sum + order.amountPaid, 0);
-  const totalOtherIncome = income.reduce((sum, inc) => sum + inc.amount, 0);
+  const totalOtherIncome = income.reduce((sum, inc) => sum + (inc.amount || 0), 0);
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
   const cashBalance = startingBalance + totalPaymentsReceived + totalOtherIncome - totalExpenses;
 

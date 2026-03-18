@@ -53,7 +53,7 @@ export default function IncomeRow({ income, onEdit, onDelete }: IncomeRowProps) 
         )}
       </td>
       <td className="px-4 py-3 whitespace-nowrap text-sm font-bold text-green-600">
-        +₱{income.amount.toFixed(2)}
+        +₱{(income.amount || 0).toFixed(2)}
       </td>
       <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
         {format(new Date(income.date), "MMM dd, yyyy")}

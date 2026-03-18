@@ -229,7 +229,7 @@ export default function OrdersPage() {
   // Calculate total revenue and payments
   const totalRevenue = orders.reduce((sum, order) => sum + order.price, 0);
   const totalPaid = orders.reduce((sum, order) => sum + order.amountPaid, 0);
-  const totalOtherIncome = income.reduce((sum, inc) => sum + inc.amount, 0);
+  const totalOtherIncome = income.reduce((sum, inc) => sum + (inc.amount || 0), 0);
   const totalOutstanding = totalRevenue - totalPaid;
 
   return (

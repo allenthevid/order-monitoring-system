@@ -21,10 +21,18 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     
+    // Validate required fields
+    if (!body.description || typeof body.amount !== 'number' || body.amount < 0) {
+      return NextResponse.json(
+        { error: "Invalid income data. Description and valid amount are required." },
+        { status: 400 }
+      );
+    }
+    
     const income = await prisma.income.create({
       data: {
         description: body.description,
-        category: body.category,
+        category: body.category || 'other',
         amount: body.amount,
         date: new Date(body.date),
         customerName: body.customerName || null,
