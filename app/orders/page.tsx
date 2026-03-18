@@ -1,17 +1,22 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Order, Payment, Expense } from "@/types";
+import { Order, Payment, Expense, Income } from "@/types";
 import OrderRow from "@/components/OrderRow";
 import OrderForm from "@/components/OrderForm";
 import OrderEditForm from "@/components/OrderEditForm";
+import IncomeForm from "@/components/IncomeForm";
+import IncomeRow from "@/components/IncomeRow";
 import CashSummary from "@/components/CashSummary";
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [income, setIncome] = useState<Income[]>([]);
   const [showForm, setShowForm] = useState(false);
+  const [showIncomeForm, setShowIncomeForm] = useState(false);
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
+  const [editingIncome, setEditingIncome] = useState<Income | null>(null);
   const [filter, setFilter] = useState<string>("all");
   const [loading, setLoading] = useState(true);
 
@@ -21,12 +26,14 @@ export default function OrdersPage() {
     async function fetchData() {
       try {
         setLoading(true);
-        const [ordersResponse, expensesResponse] = await Promise.all([
+        const [ordersResponse, expensesResponse, incomeResponse] = await Promise.all([
           fetch("/api/orders"),
-          fetch("/api/expenses")
+          fetch("/api/expenses"),
+          fetch("/api/income")
         ]);
         const ordersData = await ordersResponse.json();
         const expensesData = await expensesResponse.json();
+        const incomeData = await incomeResponse.json();
         
         if (!isMounted) return;
         
@@ -42,6 +49,12 @@ export default function OrdersPage() {
           setExpenses(expensesData);
         } else {
           setExpenses([]);
+        }
+        
+        if (Array.isArray(incomeData)) {
+          setIncome(incomeData);
+        } else {
+          setIncome([]);
         }
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -65,12 +78,14 @@ export default function OrdersPage() {
 
   const fetchOrders = async () => {
     try {
-      const [ordersResponse, expensesResponse] = await Promise.all([
+      const [ordersResponse, expensesResponse, incomeResponse] = await Promise.all([
         fetch("/api/orders"),
-        fetch("/api/expenses")
+        fetch("/api/expenses"),
+        fetch("/api/income")
       ]);
       const ordersData = await ordersResponse.json();
       const expensesData = await expensesResponse.json();
+      const incomeData = await incomeResponse.json();
       // Ensure data is an array
       if (Array.isArray(ordersData)) {
         setOrders(ordersData);
@@ -83,10 +98,16 @@ export default function OrdersPage() {
       } else {
         setExpenses([]);
       }
+      if (Array.isArray(incomeData)) {
+        setIncome(incomeData);
+      } else {
+        setIncome([]);
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
       setOrders([]);
       setExpenses([]);
+      setIncome([]);
     }
   };
 
@@ -163,6 +184,44 @@ export default function OrdersPage() {
     }
   };
 
+  const handleAddIncome = async (inc: Omit<Income, "id"> | Income) => {
+    if ("id" in inc) {
+      // Update existing income
+      const response = await fetch(`/api/income/${inc.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(inc),
+      });
+      const updatedIncome = await response.json();
+      setIncome(income.map((i) => i.id === inc.id ? updatedIncome : i));
+      setEditingIncome(null);
+    } else {
+      // Add new income
+      const response = await fetch("/api/income", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(inc),
+      });
+      const newIncome = await response.json();
+      setIncome([...income, newIncome]);
+      setShowIncomeForm(false);
+    }
+  };
+
+  const handleEditIncome = (inc: Income) => {
+    setEditingIncome(inc);
+    setShowIncomeForm(false);
+  };
+
+  const handleDeleteIncome = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this income entry?")) return;
+    
+    await fetch(`/api/income/${id}`, {
+      method: "DELETE",
+    });
+    setIncome(income.filter((i) => i.id !== id));
+  };
+
   const filteredOrders = orders.filter(
     (order) => filter === "all" || order.status === filter
   );
@@ -170,6 +229,7 @@ export default function OrdersPage() {
   // Calculate total revenue and payments
   const totalRevenue = orders.reduce((sum, order) => sum + order.price, 0);
   const totalPaid = orders.reduce((sum, order) => sum + order.amountPaid, 0);
+  const totalOtherIncome = income.reduce((sum, inc) => sum + inc.amount, 0);
   const totalOutstanding = totalRevenue - totalPaid;
 
   return (
@@ -185,22 +245,38 @@ export default function OrdersPage() {
         <>
           <div className="flex justify-between items-center mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Orders</h1>
+              <h1 className="text-3xl font-bold text-gray-900">Orders & Income</h1>
               <p className="text-sm text-gray-600 mt-1">
-                ₱{totalPaid.toFixed(2)} collected of ₱{totalRevenue.toFixed(2)} total
+                ₱{totalPaid.toFixed(2)} from orders + ₱{totalOtherIncome.toFixed(2)} other income
               </p>
             </div>
-            <button
-              onClick={() => setShowForm(!showForm)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-            >
-              {showForm ? "Cancel" : "New Order"}
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  setShowIncomeForm(!showIncomeForm);
+                  setShowForm(false);
+                  setEditingIncome(null);
+                }}
+                className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+              >
+                {showIncomeForm ? "Cancel" : "+ Add Income"}
+              </button>
+              <button
+                onClick={() => {
+                  setShowForm(!showForm);
+                  setShowIncomeForm(false);
+                  setEditingOrder(null);
+                }}
+                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+              >
+                {showForm ? "Cancel" : "+ New Order"}
+              </button>
+            </div>
           </div>
 
       {/* Revenue Summary */}
       <div className="grid md:grid-cols-4 gap-4 mb-6">
-        <CashSummary orders={orders} expenses={expenses} />
+        <CashSummary orders={orders} expenses={expenses} income={income} />
         
         <div className="bg-white p-4 rounded-lg shadow-md border-l-4 border-blue-500">
           <h3 className="text-sm font-medium text-gray-600 mb-1">
@@ -236,6 +312,12 @@ export default function OrdersPage() {
         </div>
       )}
 
+      {showIncomeForm && (
+        <div className="mb-6">
+          <IncomeForm onSubmit={handleAddIncome} />
+        </div>
+      )}
+
       {editingOrder && (
         <OrderEditForm
           order={editingOrder}
@@ -243,6 +325,66 @@ export default function OrdersPage() {
           onCancel={() => setEditingOrder(null)}
         />
       )}
+
+      {editingIncome && (
+        <div className="mb-6">
+          <IncomeForm
+            income={editingIncome}
+            onSubmit={handleAddIncome}
+            onCancel={() => setEditingIncome(null)}
+          />
+        </div>
+      )}
+
+      {/* Income Entries Section */}
+      {income.length > 0 && (
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-3">Other Income (Design Fees, Sample Fees, etc.)</h2>
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-green-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Description
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Category
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Customer
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Amount
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Date
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {income.map((inc) => (
+                    <IncomeRow
+                      key={inc.id}
+                      income={inc}
+                      onEdit={handleEditIncome}
+                      onDelete={handleDeleteIncome}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <h2 className="text-xl font-semibold text-gray-900 mb-3">Orders</h2>
 
       <div className="mb-6 flex gap-2">
         {["all", "pending", "printing", "completed", "cancelled"].map((status) => (

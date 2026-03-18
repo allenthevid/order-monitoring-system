@@ -1,14 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Order, Expense } from "@/types";
+import { Order, Expense, Income } from "@/types";
 
 interface CashSummaryProps {
   orders: Order[];
   expenses: Expense[];
+  income?: Income[];
 }
 
-export default function CashSummary({ orders, expenses }: CashSummaryProps) {
+export default function CashSummary({ orders, expenses, income = [] }: CashSummaryProps) {
   const [startingBalance, setStartingBalance] = useState(0);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -50,10 +51,11 @@ export default function CashSummary({ orders, expenses }: CashSummaryProps) {
     }
   };
 
-  // Calculate cash: starting balance + payments received - expenses
+  // Calculate cash: starting balance + payments received + other income - expenses
   const totalPaymentsReceived = orders.reduce((sum, order) => sum + order.amountPaid, 0);
+  const totalOtherIncome = income.reduce((sum, inc) => sum + inc.amount, 0);
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
-  const cashBalance = startingBalance + totalPaymentsReceived - totalExpenses;
+  const cashBalance = startingBalance + totalPaymentsReceived + totalOtherIncome - totalExpenses;
 
   if (loading) {
     return (
@@ -114,8 +116,12 @@ export default function CashSummary({ orders, expenses }: CashSummaryProps) {
           <span className="font-semibold">₱{startingBalance.toFixed(2)}</span>
         </div>
         <div className="flex justify-between">
-          <span>Payments Received:</span>
+          <span>Order Payments:</span>
           <span className="font-semibold">+₱{totalPaymentsReceived.toFixed(2)}</span>
+        </div>
+        <div className="flex justify-between">
+          <span>Other Income:</span>
+          <span className="font-semibold">+₱{totalOtherIncome.toFixed(2)}</span>
         </div>
         <div className="flex justify-between">
           <span>Total Expenses:</span>

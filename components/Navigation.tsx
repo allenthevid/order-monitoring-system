@@ -14,6 +14,7 @@ export default function Navigation() {
     { href: "/inventory", label: "Inventory" },
     { href: "/invoices", label: "Invoices" },
     { href: "/expenses", label: "Expenses" },
+    { href: "/customer-order", label: "Place Order" },
   ];
 
   const handleLogout = async () => {

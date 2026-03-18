@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Expense, Order } from "@/types";
+import { Expense, Order, Income } from "@/types";
 import ExpenseRow from "@/components/ExpenseRow";
 import ExpenseForm from "@/components/ExpenseForm";
 import CashSummary from "@/components/CashSummary";
@@ -9,6 +9,7 @@ import { format, startOfMonth, endOfMonth } from "date-fns";
 
 export default function ExpensesPage() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [income, setIncome] = useState<Income[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
@@ -22,12 +23,14 @@ export default function ExpensesPage() {
       try {
         setLoading(true);
         
-        const [expensesResponse, ordersResponse] = await Promise.all([
+        const [expensesResponse, incomeResponse, ordersResponse] = await Promise.all([
           fetch("/api/expenses"),
+          fetch("/api/income"),
           fetch("/api/orders")
         ]);
         
         const expensesData = await expensesResponse.json();
+        const incomeData = await incomeResponse.json();
         const ordersData = await ordersResponse.json();
         
         if (!isMounted) return;
@@ -39,6 +42,12 @@ export default function ExpensesPage() {
           setExpenses([]);
         }
         
+        if (Array.isArray(incomeData)) {
+          setIncome(incomeData);
+        } else {
+          setIncome([]);
+        }
+        
         if (Array.isArray(ordersData)) {
           setOrders(ordersData);
         } else {
@@ -48,6 +57,7 @@ export default function ExpensesPage() {
         console.error('Error fetching data:', error);
         if (isMounted) {
           setExpenses([]);
+          setIncome([]);
           setOrders([]);
         }
       } finally {
@@ -154,7 +164,7 @@ export default function ExpensesPage() {
 
           {/* Summary Cards */}
           <div className="grid md:grid-cols-4 gap-6 mb-6">
-            <CashSummary orders={orders} expenses={expenses} />
+            <CashSummary orders={orders} expenses={expenses} income={income} />
             
             <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-red-500">
               <h3 className="text-sm font-medium text-gray-600 mb-1">

@@ -41,6 +41,18 @@ export interface Order {
 // Filament Inventory Types
 export type FilamentType = 'PLA' | 'ABS' | 'PETG' | 'TPU' | 'Nylon';
 
+export interface Product {
+  id: string;
+  name: string;
+  description?: string;
+  basePrice: number;
+  filamentType: string;
+  category?: string;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface Filament {
   id: string;
   type: FilamentType;
@@ -87,6 +99,20 @@ export interface Expense {
   amount: number;
   date: Date;
   vendor?: string;
+  notes?: string;
+  relatedOrderId?: string;
+}
+
+// Income Types (for non-order revenue)
+export type IncomeCategory = 'design_fee' | 'sample_fee' | 'consultation' | 'other';
+
+export interface Income {
+  id: string;
+  description: string;
+  category: IncomeCategory;
+  amount: number;
+  date: Date;
+  customerName?: string;
   notes?: string;
   relatedOrderId?: string;
 }
