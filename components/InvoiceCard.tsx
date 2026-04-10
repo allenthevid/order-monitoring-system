@@ -26,7 +26,6 @@ export default function InvoiceCard({ invoice }: InvoiceCardProps) {
     doc.setFontSize(10);
     doc.text(`Invoice #: ${invoice.invoiceNumber}`, 20, 40);
     doc.text(`Issue Date: ${format(invoice.issueDate, "MMM dd, yyyy")}`, 20, 46);
-    doc.text(`Due Date: ${format(invoice.dueDate, "MMM dd, yyyy")}`, 20, 52);
 
     // Customer info
     doc.setFontSize(12);
@@ -42,17 +41,15 @@ export default function InvoiceCard({ invoice }: InvoiceCardProps) {
       body: invoice.items.map((item) => [
         item.description,
         item.quantity.toString(),
-        `₱${item.unitPrice.toFixed(2)}`,
-        `₱${item.total.toFixed(2)}`,
+        `PHP ${item.unitPrice.toFixed(2)}`,
+        `PHP ${item.total.toFixed(2)}`,
       ]),
     });
 
     // Totals
     const finalY = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY || 90;
-    doc.text(`Subtotal: ₱${invoice.subtotal.toFixed(2)}`, 150, finalY + 10);
-    doc.text(`Tax: ₱${invoice.tax.toFixed(2)}`, 150, finalY + 16);
     doc.setFontSize(12);
-    doc.text(`Total: ₱${invoice.total.toFixed(2)}`, 150, finalY + 24);
+    doc.text(`Total: PHP ${invoice.total.toFixed(2)}`, 150, finalY + 10);
 
     if (invoice.notes) {
       doc.setFontSize(10);
@@ -87,10 +84,6 @@ export default function InvoiceCard({ invoice }: InvoiceCardProps) {
           {format(new Date(invoice.issueDate), "MMM dd, yyyy")}
         </p>
         <p>
-          <span className="font-medium">Due Date:</span>{" "}
-          {format(new Date(invoice.dueDate), "MMM dd, yyyy")}
-        </p>
-        <p>
           <span className="font-medium">Email:</span> {invoice.customerEmail}
         </p>
       </div>
@@ -109,14 +102,6 @@ export default function InvoiceCard({ invoice }: InvoiceCardProps) {
       </div>
 
       <div className="border-t pt-4 space-y-1 text-sm mb-4">
-        <div className="flex justify-between">
-          <span>Subtotal:</span>
-          <span>₱{invoice.subtotal.toFixed(2)}</span>
-        </div>
-        <div className="flex justify-between">
-          <span>Tax:</span>
-          <span>₱{invoice.tax.toFixed(2)}</span>
-        </div>
         <div className="flex justify-between font-bold text-base">
           <span>Total:</span>
           <span>₱{invoice.total.toFixed(2)}</span>

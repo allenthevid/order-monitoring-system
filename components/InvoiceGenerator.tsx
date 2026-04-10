@@ -14,8 +14,6 @@ export default function InvoiceGenerator({
   onGenerate,
 }: InvoiceGeneratorProps) {
   const [selectedOrderId, setSelectedOrderId] = useState("");
-  const [taxRate, setTaxRate] = useState(0.1); // 10% default
-  const [dueInDays, setDueInDays] = useState(30);
   const [notes, setNotes] = useState("");
 
   const selectedOrder = orders.find((o) => o.id === selectedOrderId);
@@ -26,7 +24,7 @@ export default function InvoiceGenerator({
 
     const items: InvoiceItem[] = [
       {
-        description: `${selectedOrder.itemName} (${selectedOrder.filamentColor} ${selectedOrder.filamentType}) - ${selectedOrder.printTime}h print time`,
+        description: `${selectedOrder.itemName} (${selectedOrder.filamentColor} ${selectedOrder.filamentType})`,
         quantity: selectedOrder.quantity,
         unitPrice: selectedOrder.price / selectedOrder.quantity,
         total: selectedOrder.price,
@@ -34,11 +32,11 @@ export default function InvoiceGenerator({
     ];
 
     const subtotal = selectedOrder.price;
-    const tax = subtotal * taxRate;
-    const total = subtotal + tax;
+    const tax = 0;
+    const total = subtotal;
 
     const issueDate = new Date();
-    const dueDate = addDays(issueDate, dueInDays);
+    const dueDate = new Date();
 
     onGenerate({
       orderId: selectedOrder.id,
@@ -112,54 +110,16 @@ export default function InvoiceGenerator({
           </div>
         )}
 
-        <div className="grid md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Tax Rate (%) *
-            </label>
-            <input
-              type="number"
-              required
-              min="0"
-              max="100"
-              step="0.1"
-              value={taxRate * 100}
-              onChange={(e) => setTaxRate(parseFloat(e.target.value) / 100)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
-            />
-          </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Due in Days *
-            </label>
-            <input
-              type="number"
-              required
-              min="1"
-              value={dueInDays}
-              onChange={(e) => setDueInDays(parseInt(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
-            />
-          </div>
-        </div>
 
         {selectedOrder && (
           <div className="bg-blue-50 p-4 rounded-md">
             <h3 className="font-medium mb-2">Invoice Summary:</h3>
             <div className="text-sm space-y-1">
-              <div className="flex justify-between">
-                <span>Subtotal:</span>
-                <span>₱{selectedOrder.price.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Tax ({(taxRate * 100).toFixed(1)}%):</span>
-                <span>₱{(selectedOrder.price * taxRate).toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between font-bold text-base border-t pt-1">
+              <div className="flex justify-between font-bold text-base">
                 <span>Total:</span>
                 <span>
-                  ₱{(selectedOrder.price * (1 + taxRate)).toFixed(2)}
+                  ₱{selectedOrder.price.toFixed(2)}
                 </span>
               </div>
             </div>
