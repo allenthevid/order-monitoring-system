@@ -89,7 +89,7 @@ export default function InvoiceCard({ invoice }: InvoiceCardProps) {
       </div>
 
       <div className="border-t pt-4 mb-4">
-        <div className="space-y-1 text-sm">
+        <div className="space-y-1 text-sm text-gray-600">
           {invoice.items.map((item, index) => (
             <div key={index} className="flex justify-between">
               <span>
@@ -102,7 +102,7 @@ export default function InvoiceCard({ invoice }: InvoiceCardProps) {
       </div>
 
       <div className="border-t pt-4 space-y-1 text-sm mb-4">
-        <div className="flex justify-between font-bold text-base">
+        <div className="flex justify-between font-bold text-base text-gray-700">
           <span>Total:</span>
           <span>₱{invoice.total.toFixed(2)}</span>
         </div>
