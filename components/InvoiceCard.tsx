@@ -21,22 +21,31 @@ export default function InvoiceCard({ invoice }: InvoiceCardProps) {
 
     // Header
     doc.setFontSize(20);
-    doc.text("INVOICE", 105, 20, { align: "center" });
+    doc.text("SALES INVOICE", 105, 20, { align: "center" });
+
+    // Company info
+    doc.setFontSize(11);
+    doc.text("KOL 3D Printing Services", 20, 32);
+    doc.setFontSize(9);
+    doc.text("kol3dprintingservices@gmail.com", 20, 37);
+    doc.text("09283127522", 20, 41);
+    doc.text("Blk 27 Lot 65 Ph5 Comets street", 20, 45);
+    doc.text("Garden Villa Santa Rosa Laguna", 20, 49);
 
     doc.setFontSize(10);
-    doc.text(`Invoice #: ${invoice.invoiceNumber}`, 20, 40);
-    doc.text(`Issue Date: ${format(invoice.issueDate, "MMM dd, yyyy")}`, 20, 46);
+    doc.text(`Invoice #: ${invoice.invoiceNumber}`, 20, 58);
+    doc.text(`Issue Date: ${format(invoice.issueDate, "MMM dd, yyyy")}`, 20, 64);
 
     // Customer info
     doc.setFontSize(12);
-    doc.text("Bill To:", 20, 65);
+    doc.text("Bill To:", 20, 77);
     doc.setFontSize(10);
-    doc.text(invoice.customerName, 20, 71);
-    doc.text(invoice.customerEmail, 20, 77);
+    doc.text(invoice.customerName, 20, 83);
+    doc.text(invoice.customerEmail, 20, 89);
 
     // Items table
     autoTable(doc, {
-      startY: 90,
+      startY: 100,
       head: [["Description", "Qty", "Unit Price", "Total"]],
       body: invoice.items.map((item) => [
         item.description,

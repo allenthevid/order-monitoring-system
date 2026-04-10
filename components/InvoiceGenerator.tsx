@@ -80,8 +80,8 @@ export default function InvoiceGenerator({
 
         {selectedOrder && (
           <div className="bg-gray-50 p-4 rounded-md">
-            <h3 className="font-medium mb-2">Order Details:</h3>
-            <div className="text-sm space-y-1">
+            <h3 className="font-medium mb-2 text-gray-700">Order Details:</h3>
+            <div className="text-sm space-y-1 text-gray-600">
               <p>
                 <span className="font-medium">Customer:</span>{" "}
                 {selectedOrder.customerName}
@@ -113,7 +113,7 @@ export default function InvoiceGenerator({
 
 
         {selectedOrder && (
-          <div className="bg-blue-50 p-4 rounded-md">
+          <div className="bg-blue-50 p-4 rounded-md text-black">
             <h3 className="font-medium mb-2">Invoice Summary:</h3>
             <div className="text-sm space-y-1">
               <div className="flex justify-between font-bold text-base">
